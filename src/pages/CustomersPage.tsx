@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { fetchClients } from '../api/clients'
 import {
   createCustomer,
   deleteCustomer,
@@ -8,7 +9,7 @@ import {
 import { ApiError } from '../api/client'
 import { Button } from '../components/ui/Button'
 import { Spinner } from '../components/ui/Spinner'
-import type { Customer, CustomerUpsert } from '../types'
+import type { Client, Customer, CustomerUpsert } from '../types'
 
 const emptyForm: CustomerUpsert = {
   fullName: '',
@@ -20,6 +21,7 @@ const emptyForm: CustomerUpsert = {
 
 export function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([])
+  const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState<CustomerUpsert>(emptyForm)
@@ -30,8 +32,9 @@ export function CustomersPage() {
     setLoading(true)
     setError(null)
     try {
-      const data = await fetchCustomers()
-      setCustomers(data)
+      const [customerData, clientData] = await Promise.all([fetchCustomers(), fetchClients()])
+      setCustomers(customerData)
+      setClients(clientData)
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Error al cargar clientes')
     } finally {
@@ -102,7 +105,7 @@ export function CustomersPage() {
       <div className="container">
         <header className="section-header">
           <h2>Clientes</h2>
-          <p>Administración de clientes (requiere rol Admin en la API).</p>
+          <p>Ficha de clientes CRM y cuentas registradas en la tienda (requiere rol Admin).</p>
         </header>
 
         {error && (
@@ -206,6 +209,38 @@ export function CustomersPage() {
               </div>
             )}
           </div>
+        </div>
+
+        <div className="card admin-table-wrap admin-stack">
+          <h3>Cuentas de cliente</h3>
+          {loading ? (
+            <Spinner label="Cargando cuentas…" />
+          ) : clients.length === 0 ? (
+            <p className="empty-state">No hay cuentas de cliente registradas.</p>
+          ) : (
+            <div className="table-scroll">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                    <th>Teléfono</th>
+                    <th>Rol</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {clients.map((client) => (
+                    <tr key={client.id}>
+                      <td>{client.fullName}</td>
+                      <td>{client.email}</td>
+                      <td>{client.phone ?? '—'}</td>
+                      <td>{client.roles.join(', ') || 'Customer'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </section>

@@ -33,6 +33,15 @@ export interface Product {
   inStock: boolean
 }
 
+export interface ProductUpsert {
+  name: string
+  description: string
+  price: number
+  imageUrl?: string
+  category?: string
+  inStock: boolean
+}
+
 export interface Customer {
   id: number
   fullName: string
@@ -51,9 +60,81 @@ export interface CustomerUpsert {
   notes?: string
 }
 
+export interface Client {
+  id: string
+  email: string
+  fullName: string
+  phone?: string
+  roles: string[]
+  createdAt?: string
+}
+
 export interface CartItem {
   product: Product
   quantity: number
+}
+
+export type OrderStatus =
+  | 'payment_pending'
+  | 'paid'
+  | 'preparing'
+  | 'ready_for_pickup'
+  | 'out_for_delivery'
+  | 'delivered'
+  | 'cancelled'
+
+export interface OrderItem {
+  id: number
+  productId?: number | null
+  name: string
+  quantity: number
+  unitPrice: number
+  lineTotal: number
+}
+
+export interface ShopOrder {
+  id: number
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  deliveryAddress?: string
+  notes?: string
+  status: OrderStatus | string
+  deliveryOption: string
+  subtotal: number
+  deliveryFee: number
+  total: number
+  items: OrderItem[]
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface OrderRequest {
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  deliveryAddress?: string
+  deliveryOption: string
+  notes?: string
+  items: { productId: number; quantity: number }[]
+}
+
+export interface OrderUpdate {
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  deliveryAddress?: string
+  notes?: string
+  status: OrderStatus
+  deliveryOption: string
+  total: number
+}
+
+export interface OrderResponse {
+  status: string
+  message: string
+  orderId: number
+  order: ShopOrder
 }
 
 export interface ApiProblem {

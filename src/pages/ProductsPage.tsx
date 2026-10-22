@@ -88,7 +88,7 @@ export function ProductsPage() {
         {!loading && error && (
           <p className="banner banner-warning" role="status">
             {usingDemo
-              ? `${error} Conecta la API .NET para ver el inventario en vivo.`
+              ? `${error} Conecta la API para ver el inventario en vivo.`
               : error}
           </p>
         )}

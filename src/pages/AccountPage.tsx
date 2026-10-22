@@ -33,9 +33,17 @@ export function AccountPage() {
 
           <div className="hero-actions">
             {isAdmin && (
-              <Link to="/admin/clientes" className="btn btn-outline">
-                Gestionar clientes
-              </Link>
+              <>
+                <Link to="/admin/pedidos" className="btn btn-outline">
+                  Gestionar pedidos
+                </Link>
+                <Link to="/admin/productos" className="btn btn-outline">
+                  Gestionar productos
+                </Link>
+                <Link to="/admin/clientes" className="btn btn-outline">
+                  Gestionar clientes
+                </Link>
+              </>
             )}
             <Button variant="outline" onClick={logout}>
               Cerrar sesión

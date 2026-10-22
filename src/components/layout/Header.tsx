@@ -35,9 +35,17 @@ export function Header() {
             Contacto
           </NavLink>
           {isAdmin && (
-            <NavLink to="/admin/clientes" onClick={closeNav}>
-              Clientes
-            </NavLink>
+            <>
+              <NavLink to="/admin/pedidos" onClick={closeNav}>
+                Pedidos
+              </NavLink>
+              <NavLink to="/admin/productos" onClick={closeNav}>
+                Productos
+              </NavLink>
+              <NavLink to="/admin/clientes" onClick={closeNav}>
+                Clientes
+              </NavLink>
+            </>
           )}
           {isAuthenticated ? (
             <>

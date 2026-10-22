@@ -10,6 +10,8 @@ import { CustomersPage } from './pages/CustomersPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { ProductDetailPage } from './pages/ProductDetailPage'
+import { OrdersAdminPage } from './pages/OrdersAdminPage'
+import { ProductsAdminPage } from './pages/ProductsAdminPage'
 import { ProductsPage } from './pages/ProductsPage'
 import { RegisterPage } from './pages/RegisterPage'
 
@@ -32,6 +34,22 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <AccountPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="admin/pedidos"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <OrdersAdminPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="admin/productos"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <ProductsAdminPage />
                   </ProtectedRoute>
                 }
               />
