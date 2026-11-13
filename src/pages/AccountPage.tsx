@@ -74,7 +74,7 @@ export function AccountPage() {
                   </strong>
                 </p>
                 <p className="cart-note">
-                  Cada pedido marcado como entregado suma una estrella. Si el estado cambia a otro, se quita.
+                  Cada pedido marcado como entregado suma una estrella. Si el estado cambia a otro, se elimina la estrella.
                 </p>
                 {loyalty.rewards.length === 0 ? (
                   <p className="cart-note">Aún no hay recompensas publicadas.</p>

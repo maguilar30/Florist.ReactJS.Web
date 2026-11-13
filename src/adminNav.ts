@@ -9,4 +9,5 @@ export const ADMIN_MENU = [
   { to: '/admin/envio', label: 'Envío' },
   { to: '/admin/descuentos', label: 'Descuentos' },
   { to: '/admin/fidelidad', label: 'Fidelidad' },
+  { to: '/admin/estrellas', label: 'Estrellas' },
 ] as const

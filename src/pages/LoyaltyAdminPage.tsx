@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import {
   createLoyaltyReward,
   deleteLoyaltyReward,
-  fetchLoyaltyMembers,
   fetchLoyaltyRewards,
   updateLoyaltyReward,
 } from '../api/loyalty'
@@ -11,7 +11,7 @@ import { Button } from '../components/ui/Button'
 import { Spinner } from '../components/ui/Spinner'
 import { LOYALTY_KIND_LABELS } from '../loyalty'
 import { formatMoney } from '../money'
-import type { LoyaltyKind, LoyaltyMember, LoyaltyReward } from '../types'
+import type { LoyaltyKind, LoyaltyReward } from '../types'
 
 const emptyForm = {
   name: '',
@@ -25,7 +25,6 @@ const emptyForm = {
 
 export function LoyaltyAdminPage() {
   const [rewards, setRewards] = useState<LoyaltyReward[]>([])
-  const [members, setMembers] = useState<LoyaltyMember[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState(emptyForm)
@@ -36,9 +35,7 @@ export function LoyaltyAdminPage() {
     setLoading(true)
     setError(null)
     try {
-      const [rewardRows, memberRows] = await Promise.all([fetchLoyaltyRewards(), fetchLoyaltyMembers()])
-      setRewards(rewardRows)
-      setMembers(memberRows)
+      setRewards(await fetchLoyaltyRewards())
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Error al cargar el programa de fidelidad')
     } finally {
@@ -134,7 +131,9 @@ export function LoyaltyAdminPage() {
           <h2>Fidelidad</h2>
           <p>
             Cada pedido de un cliente registrado marcado como entregado suma una estrella. Si el estado cambia a
-            cualquier otro, se quita. Define cuántos pedidos se necesitan y qué recompensa recibe.
+            cualquier otro, se quita. Define cuántos pedidos se necesitan y qué recompensa recibe. Los clientes con
+            estrellas se listan en{' '}
+            <Link to="/admin/estrellas">Estrellas</Link>.
           </p>
         </header>
 
@@ -289,35 +288,6 @@ export function LoyaltyAdminPage() {
           </div>
         </div>
 
-        <div className="card admin-table-wrap admin-stack">
-          <h3>Estrellas de clientes</h3>
-          {loading ? (
-            <Spinner label="Cargando clientes…" />
-          ) : members.length === 0 ? (
-            <p className="empty-state">Todavía no hay pedidos de cuentas registradas.</p>
-          ) : (
-            <div className="table-scroll">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Cliente</th>
-                    <th>Correo</th>
-                    <th>Estrellas</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {members.map((row) => (
-                    <tr key={row.userId}>
-                      <td>{row.fullName}</td>
-                      <td>{row.email}</td>
-                      <td>{row.stars}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
       </div>
     </section>
   )

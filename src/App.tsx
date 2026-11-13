@@ -16,6 +16,7 @@ import { CustomersPage } from './pages/CustomersPage'
 import { DeliveryFeesAdminPage } from './pages/DeliveryFeesAdminPage'
 import { DiscountsAdminPage } from './pages/DiscountsAdminPage'
 import { LoyaltyAdminPage } from './pages/LoyaltyAdminPage'
+import { LoyaltyMembersAdminPage } from './pages/LoyaltyMembersAdminPage'
 import { HomePage } from './pages/HomePage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { LoginPage } from './pages/LoginPage'
@@ -77,6 +78,7 @@ export default function App() {
                 <Route path="envio" element={<DeliveryFeesAdminPage />} />
                 <Route path="descuentos" element={<DiscountsAdminPage />} />
                 <Route path="fidelidad" element={<LoyaltyAdminPage />} />
+                <Route path="estrellas" element={<LoyaltyMembersAdminPage />} />
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>

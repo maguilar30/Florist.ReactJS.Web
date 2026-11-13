@@ -147,7 +147,10 @@ export interface LoyaltyMember {
   userId: string
   email: string
   fullName: string
+  phone?: string | null
   stars: number
+  orderCount: number
+  totalSpent: number
 }
 
 export interface CartItem {
