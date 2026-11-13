@@ -25,6 +25,7 @@ export function ProductCard({ product }: ProductCardProps) {
         />
       </Link>
       <div className="product-card-body">
+        {product.category && <p className="product-card-category">{product.category}</p>}
         <h3>
           <Link to={`/productos/${product.id}`}>{product.name}</Link>
         </h3>

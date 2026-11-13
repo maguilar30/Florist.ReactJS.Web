@@ -7,6 +7,7 @@ import { AdminLayout } from './pages/AdminLayout'
 import { AccountPage } from './pages/AccountPage'
 import { MyOrdersPage } from './pages/MyOrdersPage'
 import { CartPage } from './pages/CartPage'
+import { CategoriesAdminPage } from './pages/CategoriesAdminPage'
 import { ContactInfoAdminPage } from './pages/ContactInfoAdminPage'
 import { ContactMessagesAdminPage } from './pages/ContactMessagesAdminPage'
 import { ContactPage } from './pages/ContactPage'
@@ -65,6 +66,7 @@ export default function App() {
                 <Route index element={<Navigate to="pedidos" replace />} />
                 <Route path="pedidos" element={<OrdersAdminPage />} />
                 <Route path="productos" element={<ProductsAdminPage />} />
+                <Route path="categorias" element={<CategoriesAdminPage />} />
                 <Route path="clientes" element={<CustomersPage />} />
                 <Route path="mensajes" element={<ContactMessagesAdminPage />} />
                 <Route path="contacto" element={<ContactInfoAdminPage />} />

@@ -43,6 +43,12 @@ export interface ProductUpsert {
   inStock: boolean
 }
 
+export interface ProductCategory {
+  id: number
+  name: string
+  sortOrder: number
+}
+
 export interface Customer {
   id: number
   fullName: string

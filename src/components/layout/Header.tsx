@@ -85,7 +85,7 @@ export function Header() {
           </button>
 
           <Link to="/productos" className="btn btn-primary header-cta">
-            Ver ramos
+            Ver productos
           </Link>
         </div>
       </div>

@@ -32,7 +32,7 @@ export function HomePage() {
               <p className="hero-card-caption">Temporada de primavera</p>
             </div>
             <div className="hero-float">
-              <strong>15+</strong>
+              <strong>10+</strong>
               <span>Años creando momentos inolvidables</span>
             </div>
           </div>

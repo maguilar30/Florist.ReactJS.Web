@@ -38,7 +38,7 @@ During development, requests to `/api/*` are proxied to `VITE_API_PROXY_TARGET` 
 - Login, register, and profile (`/api/auth/*`)
 - Account page shows the signed-in profile; **Mis pedidos** lists that user's orders (`GET /api/orders/mine`) and each order's history
 - Contact page and footer load shop address, phone, hours, email, and social links from `GET /api/contact-info`
-- Admin: products, CRM customers + registered clients, orders, contact messages, shop contact details, and delivery fees
+- Admin: products, product categories, CRM customers + registered clients, orders, contact messages, shop contact details, and delivery fees
 
 If the catalog request fails, the products page falls back to a small demo list so the layout still works.
 
@@ -71,6 +71,8 @@ Users with role `Admin` (case-insensitive) see **Pedidos**, **Productos**, and *
 | GET | `/api/products` | No |
 | GET | `/api/products/{id}` | No |
 | POST / PUT / DELETE | `/api/products` | Admin |
+| GET | `/api/product-categories` | No |
+| POST / PUT / DELETE | `/api/product-categories` | Admin |
 
 ### Customers and clients (admin)
 

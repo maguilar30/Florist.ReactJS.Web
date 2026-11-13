@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
+import { fetchProductCategories } from '../api/categories'
 import {
   createProduct,
   deleteProduct,
@@ -16,7 +17,7 @@ import {
 } from '../components/admin/TableFilters'
 import { Button } from '../components/ui/Button'
 import { Spinner } from '../components/ui/Spinner'
-import type { Product, ProductUpsert } from '../types'
+import type { Product, ProductCategory, ProductUpsert } from '../types'
 
 const emptyForm: ProductUpsert = {
   name: '',
@@ -29,6 +30,7 @@ const emptyForm: ProductUpsert = {
 
 export function ProductsAdminPage() {
   const [products, setProducts] = useState<Product[]>([])
+  const [categoryOptions, setCategoryOptions] = useState<ProductCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState<ProductUpsert>(emptyForm)
@@ -45,7 +47,9 @@ export function ProductsAdminPage() {
     setLoading(true)
     setError(null)
     try {
-      setProducts(await fetchProducts())
+      const [productData, categoryData] = await Promise.all([fetchProducts(), fetchProductCategories()])
+      setProducts(productData)
+      setCategoryOptions(categoryData)
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Error al cargar productos')
     } finally {
@@ -184,11 +188,22 @@ export function ProductsAdminPage() {
             </div>
             <div>
               <label htmlFor="prod-category">Categoría</label>
-              <input
+              <select
                 id="prod-category"
-                value={form.category}
+                value={form.category ?? ''}
                 onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-              />
+              >
+                <option value="">Sin categoría</option>
+                {categoryOptions.map((category) => (
+                  <option key={category.id} value={category.name}>
+                    {category.name}
+                  </option>
+                ))}
+                {form.category &&
+                  !categoryOptions.some((category) => category.name === form.category) && (
+                    <option value={form.category}>{form.category}</option>
+                  )}
+              </select>
             </div>
             <div>
               <label htmlFor="prod-image">Imagen (URL)</label>

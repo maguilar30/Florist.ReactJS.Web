@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { fetchProducts } from '../api/products'
 import { ProductCard } from '../components/ProductCard'
 import { Spinner } from '../components/ui/Spinner'
@@ -40,6 +40,7 @@ export function ProductsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [usingDemo, setUsingDemo] = useState(false)
+  const [category, setCategory] = useState('')
 
   useEffect(() => {
     let cancelled = false
@@ -71,6 +72,18 @@ export function ProductsPage() {
     }
   }, [])
 
+  const categories = useMemo(
+    () =>
+      [...new Set(products.map((product) => product.category?.trim()).filter(Boolean) as string[])].sort((a, b) =>
+        a.localeCompare(b, 'es'),
+      ),
+    [products],
+  )
+  const visibleProducts = useMemo(
+    () => (category ? products.filter((product) => (product.category ?? '').trim() === category) : products),
+    [products, category],
+  )
+
   return (
     <section className="page-section">
       <div className="container">
@@ -98,11 +111,40 @@ export function ProductsPage() {
         )}
 
         {!loading && products.length > 0 && (
-          <div className="product-grid">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <>
+            {categories.length > 0 && (
+              <div className="collection-filters" role="group" aria-label="Filtrar por categoría">
+                <button
+                  type="button"
+                  className={`collection-filter${category === '' ? ' is-active' : ''}`}
+                  aria-pressed={category === ''}
+                  onClick={() => setCategory('')}
+                >
+                  Todas
+                </button>
+                {categories.map((name) => (
+                  <button
+                    type="button"
+                    key={name}
+                    className={`collection-filter${category === name ? ' is-active' : ''}`}
+                    aria-pressed={category === name}
+                    onClick={() => setCategory(name)}
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+            )}
+            {visibleProducts.length === 0 ? (
+              <p className="empty-state">No hay productos en esta categoría.</p>
+            ) : (
+              <div className="product-grid">
+                {visibleProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>
