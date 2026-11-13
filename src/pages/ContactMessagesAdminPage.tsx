@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { deleteContactMessage, fetchContactMessages, markContactMessageRead } from '../api/contact'
 import { ApiError } from '../api/client'
+import { FilterEmpty, FilterInput, FilterSelect, TableSearch, matchesSearch } from '../components/admin/TableFilters'
 import { Button } from '../components/ui/Button'
 import { Spinner } from '../components/ui/Spinner'
 import { formatOrderDate } from '../orderStatus'
@@ -16,6 +17,10 @@ export function ContactMessagesAdminPage() {
   const [error, setError] = useState<string | null>(null)
   const [selected, setSelected] = useState<ContactMessage | null>(null)
   const [working, setWorking] = useState(false)
+  const [search, setSearch] = useState('')
+  const [idFilter, setIdFilter] = useState('')
+  const [senderFilter, setSenderFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -37,6 +42,29 @@ export function ContactMessagesAdminPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  const filteredMessages = useMemo(() => {
+    return messages.filter((item) => {
+      const status = isUnread(item) ? 'unread' : 'read'
+      const statusLabel = isUnread(item) ? 'Nuevo' : 'Leído'
+      return (
+        matchesSearch(
+          search,
+          item.id,
+          item.name,
+          item.email,
+          item.phone,
+          item.message,
+          statusLabel,
+          formatOrderDate(item.createdAt),
+        ) &&
+        matchesSearch(idFilter, item.id) &&
+        matchesSearch(senderFilter, item.name, item.email, item.phone) &&
+        (!statusFilter || status === statusFilter)
+      )
+    })
+  }, [messages, search, idFilter, senderFilter, statusFilter])
+  const hasFilters = Boolean(search || idFilter || senderFilter || statusFilter)
 
   async function openMessage(message: ContactMessage) {
     setSelected(message)
@@ -90,40 +118,78 @@ export function ContactMessagesAdminPage() {
             ) : messages.length === 0 ? (
               <p className="empty-state">No hay mensajes todavía.</p>
             ) : (
-              <div className="table-scroll">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Remitente</th>
-                      <th>Estado</th>
-                      <th aria-label="Acciones" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {messages.map((item) => (
-                      <tr key={item.id} className={selected?.id === item.id ? 'is-selected' : undefined}>
-                        <td>{item.id}</td>
-                        <td>
-                          {item.name}
-                          <div className="muted-cell">{item.email}</div>
-                          <div className="muted-cell">{formatOrderDate(item.createdAt)}</div>
-                        </td>
-                        <td>
-                          <span className={`status-badge ${isUnread(item) ? 'status-payment_pending' : 'status-paid'}`}>
-                            {isUnread(item) ? 'Nuevo' : 'Leído'}
-                          </span>
-                        </td>
-                        <td className="table-actions">
-                          <button type="button" className="link-btn" onClick={() => void openMessage(item)}>
-                            Ver
-                          </button>
-                        </td>
+              <>
+                <TableSearch
+                  id="messages-search"
+                  value={search}
+                  onChange={setSearch}
+                  placeholder="Buscar por remitente, correo, teléfono o mensaje…"
+                />
+                <div className="table-scroll">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Remitente</th>
+                        <th>Estado</th>
+                        <th aria-label="Acciones" />
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                      <tr className="filter-row">
+                        <th>
+                          <FilterInput value={idFilter} onChange={setIdFilter} placeholder="#" label="Filtrar número" />
+                        </th>
+                        <th>
+                          <FilterInput
+                            value={senderFilter}
+                            onChange={setSenderFilter}
+                            placeholder="Remitente"
+                            label="Filtrar remitente"
+                          />
+                        </th>
+                        <th>
+                          <FilterSelect
+                            value={statusFilter}
+                            onChange={setStatusFilter}
+                            label="Filtrar estado"
+                            options={[
+                              { value: 'unread', label: 'Nuevo' },
+                              { value: 'read', label: 'Leído' },
+                            ]}
+                          />
+                        </th>
+                        <th />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredMessages.length === 0 ? (
+                        <FilterEmpty query={hasFilters} />
+                      ) : (
+                        filteredMessages.map((item) => (
+                          <tr key={item.id} className={selected?.id === item.id ? 'is-selected' : undefined}>
+                            <td>{item.id}</td>
+                            <td>
+                              {item.name}
+                              <div className="muted-cell">{item.email}</div>
+                              {item.phone ? <div className="muted-cell">{item.phone}</div> : null}
+                              <div className="muted-cell">{formatOrderDate(item.createdAt)}</div>
+                            </td>
+                            <td>
+                              <span className={`status-badge ${isUnread(item) ? 'status-payment_pending' : 'status-paid'}`}>
+                                {isUnread(item) ? 'Nuevo' : 'Leído'}
+                              </span>
+                            </td>
+                            <td className="table-actions">
+                              <button type="button" className="link-btn" onClick={() => void openMessage(item)}>
+                                Ver
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
 
@@ -145,6 +211,14 @@ export function ContactMessagesAdminPage() {
                       <a href={`mailto:${selected.email}`}>{selected.email}</a>
                     </dd>
                   </div>
+                  {selected.phone ? (
+                    <div>
+                      <dt>Teléfono</dt>
+                      <dd>
+                        <a href={`tel:${selected.phone.replace(/[^\d+]/g, '')}`}>{selected.phone}</a>
+                      </dd>
+                    </div>
+                  ) : null}
                 </dl>
                 <p className="contact-message-body">{selected.message}</p>
                 <Button variant="outline" onClick={() => void handleDelete()} disabled={working}>

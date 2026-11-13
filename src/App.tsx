@@ -3,8 +3,11 @@ import { Layout } from './components/layout/Layout'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
+import { AdminLayout } from './pages/AdminLayout'
 import { AccountPage } from './pages/AccountPage'
+import { MyOrdersPage } from './pages/MyOrdersPage'
 import { CartPage } from './pages/CartPage'
+import { ContactInfoAdminPage } from './pages/ContactInfoAdminPage'
 import { ContactMessagesAdminPage } from './pages/ContactMessagesAdminPage'
 import { ContactPage } from './pages/ContactPage'
 import { CustomersPage } from './pages/CustomersPage'
@@ -43,37 +46,28 @@ export default function App() {
                 }
               />
               <Route
-                path="admin/pedidos"
+                path="mis-pedidos"
                 element={
-                  <ProtectedRoute adminOnly>
-                    <OrdersAdminPage />
+                  <ProtectedRoute>
+                    <MyOrdersPage />
                   </ProtectedRoute>
                 }
               />
               <Route
-                path="admin/productos"
+                path="admin"
                 element={
                   <ProtectedRoute adminOnly>
-                    <ProductsAdminPage />
+                    <AdminLayout />
                   </ProtectedRoute>
                 }
-              />
-              <Route
-                path="admin/clientes"
-                element={
-                  <ProtectedRoute adminOnly>
-                    <CustomersPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="admin/mensajes"
-                element={
-                  <ProtectedRoute adminOnly>
-                    <ContactMessagesAdminPage />
-                  </ProtectedRoute>
-                }
-              />
+              >
+                <Route index element={<Navigate to="pedidos" replace />} />
+                <Route path="pedidos" element={<OrdersAdminPage />} />
+                <Route path="productos" element={<ProductsAdminPage />} />
+                <Route path="clientes" element={<CustomersPage />} />
+                <Route path="mensajes" element={<ContactMessagesAdminPage />} />
+                <Route path="contacto" element={<ContactInfoAdminPage />} />
+              </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>

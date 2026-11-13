@@ -1,4 +1,18 @@
+import { useEffect, useState } from 'react'
+import { fetchContactInfo } from '../../api/contact'
+import type { ContactInfo } from '../../types'
+
 export function Footer() {
+  const [info, setInfo] = useState<ContactInfo | null>(null)
+
+  useEffect(() => {
+    void fetchContactInfo()
+      .then(setInfo)
+      .catch(() => {
+        setInfo(null)
+      })
+  }, [])
+
   return (
     <footer className="site-footer">
       <div className="container footer-inner">
@@ -7,15 +21,21 @@ export function Footer() {
         </span>
         <p>© {new Date().getFullYear()} Floristería Yada. Todos los derechos reservados.</p>
         <div className="footer-social">
-          <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram">
-            Instagram
-          </a>
-          <a href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook">
-            Facebook
-          </a>
-          <a href="https://wa.me/50686521155" target="_blank" rel="noreferrer" aria-label="WhatsApp">
-            WhatsApp
-          </a>
+          {info?.instagramUrl ? (
+            <a href={info.instagramUrl} target="_blank" rel="noreferrer" aria-label="Instagram">
+              Instagram
+            </a>
+          ) : null}
+          {info?.facebookUrl ? (
+            <a href={info.facebookUrl} target="_blank" rel="noreferrer" aria-label="Facebook">
+              Facebook
+            </a>
+          ) : null}
+          {info?.whatsappUrl ? (
+            <a href={info.whatsappUrl} target="_blank" rel="noreferrer" aria-label="WhatsApp">
+              WhatsApp
+            </a>
+          ) : null}
         </div>
       </div>
     </footer>

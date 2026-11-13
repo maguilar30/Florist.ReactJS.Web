@@ -3,6 +3,7 @@ export interface User {
   email: string
   fullName: string
   roles: string[]
+  companyId?: string
 }
 
 export interface AuthResponse {
@@ -150,10 +151,23 @@ export interface OrderResponse {
   order: ShopOrder
 }
 
+export interface ContactInfo {
+  heading: string
+  description: string
+  address: string
+  phone: string
+  hours: string
+  email: string
+  instagramUrl: string
+  facebookUrl: string
+  whatsappUrl: string
+}
+
 export interface ContactMessage {
   id: number
   name: string
   email: string
+  phone?: string
   message: string
   readAt?: string | null
   createdAt?: string
@@ -162,6 +176,7 @@ export interface ContactMessage {
 export interface ContactMessageCreate {
   name: string
   email: string
+  phone: string
   message: string
 }
 

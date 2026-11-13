@@ -1,5 +1,16 @@
 import { apiRequest } from './client'
-import type { ContactMessage, ContactMessageCreate, ContactMessageResponse } from '../types'
+import type { ContactInfo, ContactMessage, ContactMessageCreate, ContactMessageResponse } from '../types'
+
+export async function fetchContactInfo(): Promise<ContactInfo> {
+  return apiRequest<ContactInfo>('/contact-info', { method: 'GET' }, false)
+}
+
+export async function updateContactInfo(payload: ContactInfo): Promise<ContactInfo> {
+  return apiRequest<ContactInfo>('/contact-info', {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  })
+}
 
 export async function sendContactMessage(payload: ContactMessageCreate): Promise<ContactMessageResponse> {
   return apiRequest<ContactMessageResponse>('/contact-messages', {

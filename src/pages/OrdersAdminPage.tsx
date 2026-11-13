@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { fetchOrderHistory, fetchOrders, updateOrder } from '../api/orders'
 import { ApiError } from '../api/client'
+import { FilterEmpty, FilterInput, FilterSelect, TableSearch, matchesSearch } from '../components/admin/TableFilters'
 import { OrderHistory } from '../components/OrderHistory'
 import { Button } from '../components/ui/Button'
 import { Spinner } from '../components/ui/Spinner'
@@ -18,6 +19,11 @@ export function OrdersAdminPage() {
   const [history, setHistory] = useState<OrderHistoryEvent[]>([])
   const [historyLoading, setHistoryLoading] = useState(false)
   const [historyError, setHistoryError] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
+  const [idFilter, setIdFilter] = useState('')
+  const [customerFilter, setCustomerFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [totalFilter, setTotalFilter] = useState('')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -39,6 +45,34 @@ export function OrdersAdminPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  const filteredOrders = useMemo(() => {
+    return orders.filter((order) => {
+      const statusLabel = orderStatusLabel(order.status)
+      const total = order.total.toFixed(2)
+      return (
+        matchesSearch(
+          search,
+          order.id,
+          order.customerName,
+          order.customerEmail,
+          order.customerPhone,
+          order.deliveryAddress,
+          order.notes,
+          statusLabel,
+          total,
+          formatOrderDate(order.createdAt),
+          ...order.items.map((item) => item.name),
+        ) &&
+        matchesSearch(idFilter, order.id) &&
+        matchesSearch(customerFilter, order.customerName, order.customerEmail) &&
+        (!statusFilter || order.status === statusFilter) &&
+        matchesSearch(totalFilter, total, `$${total}`)
+      )
+    })
+  }, [orders, search, idFilter, customerFilter, statusFilter, totalFilter])
+
+  const hasFilters = Boolean(search || idFilter || customerFilter || statusFilter || totalFilter)
 
   async function loadHistory(orderId: number) {
     setHistoryLoading(true)
@@ -116,41 +150,83 @@ export function OrdersAdminPage() {
             ) : orders.length === 0 ? (
               <p className="empty-state">No hay pedidos todavía.</p>
             ) : (
-              <div className="table-scroll">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Cliente</th>
-                      <th>Estado</th>
-                      <th>Total</th>
-                      <th aria-label="Acciones" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orders.map((order) => (
-                      <tr key={order.id} className={selected?.id === order.id ? 'is-selected' : undefined}>
-                        <td>{order.id}</td>
-                        <td>
-                          {order.customerName}
-                          <div className="muted-cell">{formatOrderDate(order.createdAt)}</div>
-                        </td>
-                        <td>
-                          <span className={`status-badge status-${order.status}`}>
-                            {orderStatusLabel(order.status)}
-                          </span>
-                        </td>
-                        <td>${order.total.toFixed(2)}</td>
-                        <td className="table-actions">
-                          <button type="button" className="link-btn" onClick={() => startEdit(order)}>
-                            Editar
-                          </button>
-                        </td>
+              <>
+                <TableSearch
+                  id="orders-search"
+                  value={search}
+                  onChange={setSearch}
+                  placeholder="Buscar por cliente, correo, estado, total…"
+                />
+                <div className="table-scroll">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Cliente</th>
+                        <th>Estado</th>
+                        <th>Total</th>
+                        <th aria-label="Acciones" />
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                      <tr className="filter-row">
+                        <th>
+                          <FilterInput value={idFilter} onChange={setIdFilter} placeholder="#" label="Filtrar número" />
+                        </th>
+                        <th>
+                          <FilterInput
+                            value={customerFilter}
+                            onChange={setCustomerFilter}
+                            placeholder="Cliente"
+                            label="Filtrar cliente"
+                          />
+                        </th>
+                        <th>
+                          <FilterSelect
+                            value={statusFilter}
+                            onChange={setStatusFilter}
+                            label="Filtrar estado"
+                            options={ORDER_STATUS_OPTIONS}
+                          />
+                        </th>
+                        <th>
+                          <FilterInput
+                            value={totalFilter}
+                            onChange={setTotalFilter}
+                            placeholder="Total"
+                            label="Filtrar total"
+                          />
+                        </th>
+                        <th />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredOrders.length === 0 ? (
+                        <FilterEmpty query={hasFilters} />
+                      ) : (
+                        filteredOrders.map((order) => (
+                          <tr key={order.id} className={selected?.id === order.id ? 'is-selected' : undefined}>
+                            <td>{order.id}</td>
+                            <td>
+                              {order.customerName}
+                              <div className="muted-cell">{formatOrderDate(order.createdAt)}</div>
+                            </td>
+                            <td>
+                              <span className={`status-badge status-${order.status}`}>
+                                {orderStatusLabel(order.status)}
+                              </span>
+                            </td>
+                            <td>${order.total.toFixed(2)}</td>
+                            <td className="table-actions">
+                              <button type="button" className="link-btn" onClick={() => startEdit(order)}>
+                                Editar
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
 

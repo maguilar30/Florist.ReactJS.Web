@@ -24,7 +24,10 @@ Copy `.env.example` to `.env`:
 ```env
 VITE_API_BASE_URL=/api
 VITE_API_PROXY_TARGET=http://localhost:5000
+VITE_COMPANY_ID=yada
 ```
+
+`VITE_COMPANY_ID` is the company **slug** (not the database UUID). Every API request sends it as `X-Company-Id`, so this SPA instance only sees that company's products, customers, orders, and users. Cart and auth tokens in `localStorage` are also keyed by this slug.
 
 During development, requests to `/api/*` are proxied to `VITE_API_PROXY_TARGET` (see `vite.config.ts`). Leave `VITE_API_BASE_URL` as `/api` to use that proxy. If you set an absolute API URL instead, the FastAPI CORS list must include `http://localhost:5173`.
 
@@ -33,8 +36,9 @@ During development, requests to `/api/*` are proxied to `VITE_API_PROXY_TARGET` 
 - Public catalog and product detail (live data from `GET /api/products`)
 - Local cart (`localStorage`), delivery fees, and **Solicitar pedido** (`POST /api/orders`)
 - Login, register, and profile (`/api/auth/*`)
-- Account page lists the signed-in user's orders (`GET /api/orders/mine`) and each order's history
-- Admin: products, CRM customers + registered clients, orders (status, address, fee, total, notes, history), and contact messages
+- Account page shows the signed-in profile; **Mis pedidos** lists that user's orders (`GET /api/orders/mine`) and each order's history
+- Contact page and footer load shop address, phone, hours, email, and social links from `GET /api/contact-info`
+- Admin: products, CRM customers + registered clients, orders (status, address, fee, total, notes, history), contact messages, and shop contact details
 
 If the catalog request fails, the products page falls back to a small demo list so the layout still works.
 
@@ -81,6 +85,8 @@ Users with role `Admin` (case-insensitive) see **Pedidos**, **Productos**, and *
 | GET | `/api/clients` | Admin |
 | POST | `/api/contact-messages` | No (contact form) |
 | GET / PATCH / DELETE | `/api/contact-messages` | Admin |
+| GET | `/api/contact-info` | No |
+| PUT | `/api/contact-info` | Admin |
 
 ### Orders
 
@@ -114,11 +120,13 @@ Admin order statuses: pago pendiente, pagado, en preparación, listo para recoge
 | `/login`, `/registro` | Authentication |
 | `/olvide-contrasena` | Request a password-reset email |
 | `/restablecer-contrasena` | Set a new password from the email link |
-| `/cuenta` | Profile and own orders (authenticated) |
-| `/admin/pedidos` | Order management (admin) |
+| `/cuenta` | Profile (authenticated) |
+| `/mis-pedidos` | Own orders and history (authenticated) |
+| `/admin` | Admin area (menu + Pedidos by default) |
 | `/admin/productos` | Catalog CRUD (admin) |
 | `/admin/clientes` | CRM customers and registered clients (admin) |
 | `/admin/mensajes` | Contact form inbox (admin) |
+| `/admin/contacto` | Shop contact details (admin) |
 | `/contacto` | Contact |
 
 ## Project layout

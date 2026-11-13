@@ -1,12 +1,14 @@
 import { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useCart } from '../../context/CartContext'
 
 export function Header() {
   const [navOpen, setNavOpen] = useState(false)
-  const { isAuthenticated, user, isAdmin, logout } = useAuth()
+  const { isAuthenticated, isAdmin, logout } = useAuth()
   const { itemCount } = useCart()
+  const location = useLocation()
+  const adminActive = location.pathname.startsWith('/admin')
 
   const closeNav = () => setNavOpen(false)
 
@@ -35,27 +37,16 @@ export function Header() {
             Contacto
           </NavLink>
           {isAdmin && (
-            <>
-              <NavLink to="/admin/pedidos" onClick={closeNav}>
-                Pedidos
-              </NavLink>
-              <NavLink to="/admin/productos" onClick={closeNav}>
-                Productos
-              </NavLink>
-              <NavLink to="/admin/clientes" onClick={closeNav}>
-                Clientes
-              </NavLink>
-              <NavLink to="/admin/mensajes" onClick={closeNav}>
-                Mensajes
-              </NavLink>
-            </>
+            <Link to="/admin" className={adminActive ? 'active' : undefined} onClick={closeNav}>
+              Admin
+            </Link>
           )}
           {isAuthenticated ? (
             <>
               <NavLink to="/cuenta" onClick={closeNav}>
-                {user?.fullName.split(' ')[0]}
+                Mi cuenta
               </NavLink>
-              <NavLink to="/cuenta#pedidos" onClick={closeNav}>
+              <NavLink to="/mis-pedidos" onClick={closeNav}>
                 Mis pedidos
               </NavLink>
               <button type="button" className="nav-link-btn" onClick={() => { logout(); closeNav() }}>

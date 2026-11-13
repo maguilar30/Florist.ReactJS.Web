@@ -631,6 +631,16 @@ textarea {
   gap: 1rem;
 }
 
+.contact-info-admin {
+  max-width: 640px;
+}
+
+.contact-info-admin form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .auth-form input[type='checkbox'] {
   width: auto;
   padding: 0;
@@ -845,6 +855,60 @@ textarea {
   font-weight: 500;
 }
 
+.admin-shell {
+  padding: 1.75rem 0 4rem;
+}
+
+.admin-shell-grid {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 1.75rem;
+  align-items: start;
+}
+
+.admin-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1rem;
+  background: var(--color-ivory);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  position: sticky;
+  top: calc(var(--header-height) + 1rem);
+}
+
+.admin-menu-title {
+  margin: 0 0 0.65rem;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: var(--color-sage-dark);
+}
+
+.admin-menu a {
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--color-muted);
+}
+
+.admin-menu a:hover,
+.admin-menu a.active {
+  color: var(--color-sage-dark);
+  background: rgba(92, 107, 90, 0.1);
+}
+
+.admin-main .page-section {
+  padding: 0 0 1rem;
+}
+
+.admin-main .container {
+  width: 100%;
+  margin-inline: 0;
+}
+
 .admin-grid {
   display: grid;
   grid-template-columns: minmax(280px, 360px) 1fr;
@@ -862,6 +926,18 @@ textarea {
 
 .admin-stack {
   margin-top: 1.5rem;
+}
+
+.table-toolbar {
+  margin-bottom: 0.75rem;
+}
+
+.table-search {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgba(92, 107, 90, 0.2);
+  border-radius: 8px;
+  background: var(--color-cream);
 }
 
 .table-scroll {
@@ -886,6 +962,29 @@ textarea {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-sage);
+}
+
+.data-table tr.filter-row th {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+  padding-top: 0.2rem;
+  border-bottom-width: 2px;
+}
+
+.data-table .col-filter {
+  width: 100%;
+  min-width: 4.5rem;
+  padding: 0.35rem 0.45rem;
+  font-size: 0.8rem;
+  border: 1px solid rgba(92, 107, 90, 0.2);
+  border-radius: 6px;
+  background: var(--color-cream);
+}
+
+.data-table td.empty-state {
+  text-align: center;
+  padding: 1.25rem 0.5rem;
 }
 
 .data-table tr.is-selected td {
@@ -1167,8 +1266,21 @@ textarea {
   }
 
   .cart-layout,
-  .admin-grid {
+  .admin-grid,
+  .admin-shell-grid {
     grid-template-columns: 1fr;
+  }
+
+  .admin-menu {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .admin-menu-title {
+    width: 100%;
+    margin-bottom: 0.15rem;
   }
 }
 

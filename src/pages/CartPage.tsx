@@ -66,7 +66,7 @@ export function CartPage() {
           <p>Nuestro equipo te escribirá o llamará para indicarte cómo realizar el pago.</p>
           <div className="hero-actions">
             {user && (
-              <Link to="/cuenta" className="btn btn-outline">
+              <Link to="/mis-pedidos" className="btn btn-outline">
                 Ver mis pedidos
               </Link>
             )}

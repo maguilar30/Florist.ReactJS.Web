@@ -6,13 +6,16 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { getCompanyId } from '../api/client'
 import type { CartItem, Product } from '../types'
 
-const CART_KEY = 'yada_cart'
+function cartStorageKey(): string {
+  return `yada_cart_${getCompanyId()}`
+}
 
 function loadCart(): CartItem[] {
   try {
-    const raw = localStorage.getItem(CART_KEY)
+    const raw = localStorage.getItem(cartStorageKey())
     if (!raw) return []
     return JSON.parse(raw) as CartItem[]
   } catch {
@@ -21,7 +24,7 @@ function loadCart(): CartItem[] {
 }
 
 function saveCart(items: CartItem[]): void {
-  localStorage.setItem(CART_KEY, JSON.stringify(items))
+  localStorage.setItem(cartStorageKey(), JSON.stringify(items))
 }
 
 interface CartContextValue {

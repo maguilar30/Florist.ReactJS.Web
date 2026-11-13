@@ -1,15 +1,35 @@
-import { useState, type FormEvent } from 'react'
-import { sendContactMessage } from '../api/contact'
+import { useEffect, useState, type FormEvent } from 'react'
+import { fetchContactInfo, sendContactMessage } from '../api/contact'
 import { ApiError } from '../api/client'
 import { Button } from '../components/ui/Button'
+import { Spinner } from '../components/ui/Spinner'
+import type { ContactInfo } from '../types'
+
+function telHref(phone: string): string | undefined {
+  const cleaned = phone.replace(/[^\d+]/g, '')
+  return cleaned ? `tel:${cleaned}` : undefined
+}
 
 export function ContactPage() {
+  const [info, setInfo] = useState<ContactInfo | null>(null)
+  const [infoError, setInfoError] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        setInfo(await fetchContactInfo())
+      } catch (err) {
+        setInfoError(err instanceof ApiError ? err.message : 'No se pudieron cargar los datos de contacto')
+      }
+    })()
+  }, [])
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -20,11 +40,13 @@ export function ContactPage() {
       const result = await sendContactMessage({
         name: name.trim(),
         email: email.trim(),
+        phone: phone.trim(),
         message: message.trim(),
       })
       setSuccess(result.message || 'Gracias por escribirnos. Te contactaremos pronto.')
       setName('')
       setEmail('')
+      setPhone('')
       setMessage('')
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'No se pudo enviar el mensaje')
@@ -33,32 +55,50 @@ export function ContactPage() {
     }
   }
 
+  const phoneLink = info?.phone ? telHref(info.phone) : undefined
+
   return (
     <section className="contact page-section" id="contacto">
       <div className="container contact-grid">
         <div className="contact-info">
-          <h2>Visítanos o escríbenos</h2>
-          <p className="muted">
-            Cuéntanos la ocasión, tu paleta de colores y presupuesto. Respondemos en menos de 24 horas.
-          </p>
-          <ul className="contact-details">
-            <li>
-              <strong>Dirección</strong>
-              Hatillo 3, San José, Costa Rica
-            </li>
-            <li>
-              <strong>Teléfono</strong>
-              <a href="tel:+50686521155">+506 8652-1155</a>
-            </li>
-            <li>
-              <strong>Horario</strong>
-              Lun–Sáb 10:00 – 18:00 · Dom cerrado
-            </li>
-            <li>
-              <strong>Correo</strong>
-              <a href="mailto:info@yadacr.com">info@yadacr.com</a>
-            </li>
-          </ul>
+          {!info && !infoError ? (
+            <Spinner label="Cargando contacto…" />
+          ) : infoError ? (
+            <p className="form-error" role="alert">
+              {infoError}
+            </p>
+          ) : info ? (
+            <>
+              <h2>{info.heading}</h2>
+              {info.description ? <p className="muted">{info.description}</p> : null}
+              <ul className="contact-details">
+                {info.address ? (
+                  <li>
+                    <strong>Dirección</strong>
+                    {info.address}
+                  </li>
+                ) : null}
+                {info.phone ? (
+                  <li>
+                    <strong>Teléfono</strong>
+                    {phoneLink ? <a href={phoneLink}>{info.phone}</a> : info.phone}
+                  </li>
+                ) : null}
+                {info.hours ? (
+                  <li>
+                    <strong>Horario</strong>
+                    {info.hours}
+                  </li>
+                ) : null}
+                {info.email ? (
+                  <li>
+                    <strong>Correo</strong>
+                    <a href={`mailto:${info.email}`}>{info.email}</a>
+                  </li>
+                ) : null}
+              </ul>
+            </>
+          ) : null}
         </div>
 
         <form className="contact-form card" onSubmit={handleSubmit}>
@@ -94,6 +134,20 @@ export function ContactPage() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="phone">Teléfono</label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              required
+              autoComplete="tel"
+              placeholder="Para contactarte"
+              minLength={6}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
             />
           </div>
           <div>

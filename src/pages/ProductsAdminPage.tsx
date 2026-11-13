@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import {
   createProduct,
   deleteProduct,
@@ -6,6 +6,14 @@ import {
   updateProduct,
 } from '../api/products'
 import { ApiError } from '../api/client'
+import {
+  FilterEmpty,
+  FilterInput,
+  FilterSelect,
+  TableSearch,
+  matchesSearch,
+  uniqueValues,
+} from '../components/admin/TableFilters'
 import { Button } from '../components/ui/Button'
 import { Spinner } from '../components/ui/Spinner'
 import type { Product, ProductUpsert } from '../types'
@@ -27,6 +35,11 @@ export function ProductsAdminPage() {
   const [priceInput, setPriceInput] = useState('')
   const [editingId, setEditingId] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
+  const [search, setSearch] = useState('')
+  const [nameFilter, setNameFilter] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('')
+  const [priceFilter, setPriceFilter] = useState('')
+  const [stockFilter, setStockFilter] = useState('')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -43,6 +56,22 @@ export function ProductsAdminPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  const categories = useMemo(() => uniqueValues(products.map((product) => product.category)), [products])
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      const price = product.price.toFixed(2)
+      const stock = product.inStock ? 'Sí' : 'No'
+      return (
+        matchesSearch(search, product.name, product.description, product.category, price, stock) &&
+        matchesSearch(nameFilter, product.name) &&
+        (!categoryFilter || (product.category ?? '') === categoryFilter) &&
+        matchesSearch(priceFilter, price, `$${price}`) &&
+        (!stockFilter || (product.inStock ? 'yes' : 'no') === stockFilter)
+      )
+    })
+  }, [products, search, nameFilter, categoryFilter, priceFilter, stockFilter])
+  const hasFilters = Boolean(search || nameFilter || categoryFilter || priceFilter || stockFilter)
 
   function startEdit(product: Product) {
     setEditingId(product.id)
@@ -196,41 +225,81 @@ export function ProductsAdminPage() {
             ) : products.length === 0 ? (
               <p className="empty-state">No hay productos en el catálogo.</p>
             ) : (
-              <div className="table-scroll">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Nombre</th>
-                      <th>Categoría</th>
-                      <th>Precio</th>
-                      <th>Stock</th>
-                      <th aria-label="Acciones" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products.map((product) => (
-                      <tr key={product.id}>
-                        <td>{product.name}</td>
-                        <td>{product.category ?? '—'}</td>
-                        <td>${product.price.toFixed(2)}</td>
-                        <td>{product.inStock ? 'Sí' : 'No'}</td>
-                        <td className="table-actions">
-                          <button type="button" className="link-btn" onClick={() => startEdit(product)}>
-                            Editar
-                          </button>
-                          <button
-                            type="button"
-                            className="link-btn danger"
-                            onClick={() => void handleDelete(product.id)}
-                          >
-                            Eliminar
-                          </button>
-                        </td>
+              <>
+                <TableSearch
+                  id="products-search"
+                  value={search}
+                  onChange={setSearch}
+                  placeholder="Buscar por nombre, categoría, precio…"
+                />
+                <div className="table-scroll">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th aria-label="Acciones" />
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                      <tr className="filter-row">
+                        <th>
+                          <FilterInput value={nameFilter} onChange={setNameFilter} placeholder="Nombre" label="Filtrar nombre" />
+                        </th>
+                        <th>
+                          <FilterSelect
+                            value={categoryFilter}
+                            onChange={setCategoryFilter}
+                            label="Filtrar categoría"
+                            options={categories.map((category) => ({ value: category, label: category }))}
+                          />
+                        </th>
+                        <th>
+                          <FilterInput value={priceFilter} onChange={setPriceFilter} placeholder="Precio" label="Filtrar precio" />
+                        </th>
+                        <th>
+                          <FilterSelect
+                            value={stockFilter}
+                            onChange={setStockFilter}
+                            label="Filtrar stock"
+                            options={[
+                              { value: 'yes', label: 'Sí' },
+                              { value: 'no', label: 'No' },
+                            ]}
+                          />
+                        </th>
+                        <th />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredProducts.length === 0 ? (
+                        <FilterEmpty query={hasFilters} />
+                      ) : (
+                        filteredProducts.map((product) => (
+                          <tr key={product.id}>
+                            <td>{product.name}</td>
+                            <td>{product.category ?? '—'}</td>
+                            <td>${product.price.toFixed(2)}</td>
+                            <td>{product.inStock ? 'Sí' : 'No'}</td>
+                            <td className="table-actions">
+                              <button type="button" className="link-btn" onClick={() => startEdit(product)}>
+                                Editar
+                              </button>
+                              <button
+                                type="button"
+                                className="link-btn danger"
+                                onClick={() => void handleDelete(product.id)}
+                              >
+                                Eliminar
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
         </div>

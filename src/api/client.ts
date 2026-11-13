@@ -1,6 +1,13 @@
 import type { ApiProblem } from '../types'
 
-const TOKEN_KEY = 'yada_auth_token'
+export function getCompanyId(): string {
+  const configured = import.meta.env.VITE_COMPANY_ID as string | undefined
+  return (configured?.trim() || 'yada').toLowerCase()
+}
+
+function tokenStorageKey(): string {
+  return `yada_auth_token_${getCompanyId()}`
+}
 
 export function getApiBaseUrl(): string {
   const configured = import.meta.env.VITE_API_BASE_URL as string | undefined
@@ -11,14 +18,14 @@ export function getApiBaseUrl(): string {
 }
 
 export function getStoredToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY)
+  return localStorage.getItem(tokenStorageKey())
 }
 
 export function setStoredToken(token: string | null): void {
   if (token) {
-    localStorage.setItem(TOKEN_KEY, token)
+    localStorage.setItem(tokenStorageKey(), token)
   } else {
-    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(tokenStorageKey())
   }
 }
 
@@ -61,6 +68,8 @@ export async function apiRequest<T>(
   if (!headers.has('Content-Type') && options.body) {
     headers.set('Content-Type', 'application/json')
   }
+
+  headers.set('X-Company-Id', getCompanyId())
 
   if (auth) {
     const token = getStoredToken()
