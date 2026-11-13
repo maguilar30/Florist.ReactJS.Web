@@ -64,9 +64,16 @@ export function CartPage() {
             {successMessage}
           </p>
           <p>Nuestro equipo te escribirá o llamará para indicarte cómo realizar el pago.</p>
-          <Link to="/productos" className="btn btn-primary">
-            Volver a la colección
-          </Link>
+          <div className="hero-actions">
+            {user && (
+              <Link to="/cuenta" className="btn btn-outline">
+                Ver mis pedidos
+              </Link>
+            )}
+            <Link to="/productos" className="btn btn-primary">
+              Volver a la colección
+            </Link>
+          </div>
         </div>
       </section>
     )

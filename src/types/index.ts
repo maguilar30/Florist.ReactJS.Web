@@ -92,6 +92,19 @@ export interface OrderItem {
   lineTotal: number
 }
 
+export type OrderHistoryEventType = 'created' | 'status_changed' | 'completed' | string
+
+export interface OrderHistoryEvent {
+  id: number
+  eventType: OrderHistoryEventType
+  fromStatus?: string | null
+  toStatus?: string | null
+  actorName: string
+  actorRole: string
+  message: string
+  createdAt?: string
+}
+
 export interface ShopOrder {
   id: number
   customerName: string
@@ -135,6 +148,27 @@ export interface OrderResponse {
   message: string
   orderId: number
   order: ShopOrder
+}
+
+export interface ContactMessage {
+  id: number
+  name: string
+  email: string
+  message: string
+  readAt?: string | null
+  createdAt?: string
+}
+
+export interface ContactMessageCreate {
+  name: string
+  email: string
+  message: string
+}
+
+export interface ContactMessageResponse {
+  status: string
+  message: string
+  contactMessage: ContactMessage
 }
 
 export interface ApiProblem {

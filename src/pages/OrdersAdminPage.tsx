@@ -1,31 +1,12 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import { fetchOrders, updateOrder } from '../api/orders'
+import { fetchOrderHistory, fetchOrders, updateOrder } from '../api/orders'
 import { ApiError } from '../api/client'
+import { OrderHistory } from '../components/OrderHistory'
 import { Button } from '../components/ui/Button'
 import { Spinner } from '../components/ui/Spinner'
 import { DELIVERY_OPTIONS, deliveryFeeFor, deliveryLabel, type DeliveryOption } from '../delivery'
-import type { OrderStatus, ShopOrder } from '../types'
-
-export const ORDER_STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
-  { value: 'payment_pending', label: 'Pago pendiente' },
-  { value: 'paid', label: 'Pagado' },
-  { value: 'preparing', label: 'En preparación' },
-  { value: 'ready_for_pickup', label: 'Listo para recoger' },
-  { value: 'out_for_delivery', label: 'En camino' },
-  { value: 'delivered', label: 'Entregado' },
-  { value: 'cancelled', label: 'Cancelado' },
-]
-
-export function orderStatusLabel(status: string): string {
-  return ORDER_STATUS_OPTIONS.find((option) => option.value === status)?.label ?? status
-}
-
-function formatDate(value?: string): string {
-  if (!value) return '—'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleString('es-CR', { dateStyle: 'short', timeStyle: 'short' })
-}
+import { ORDER_STATUS_OPTIONS, formatOrderDate, orderStatusLabel } from '../orderStatus'
+import type { OrderHistoryEvent, OrderStatus, ShopOrder } from '../types'
 
 export function OrdersAdminPage() {
   const [orders, setOrders] = useState<ShopOrder[]>([])
@@ -34,6 +15,9 @@ export function OrdersAdminPage() {
   const [selected, setSelected] = useState<ShopOrder | null>(null)
   const [saving, setSaving] = useState(false)
   const [totalInput, setTotalInput] = useState('')
+  const [history, setHistory] = useState<OrderHistoryEvent[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [historyError, setHistoryError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -56,10 +40,24 @@ export function OrdersAdminPage() {
     void load()
   }, [load])
 
+  async function loadHistory(orderId: number) {
+    setHistoryLoading(true)
+    setHistoryError(null)
+    try {
+      setHistory(await fetchOrderHistory(orderId))
+    } catch (err) {
+      setHistory([])
+      setHistoryError(err instanceof ApiError ? err.message : 'No se pudo cargar el historial')
+    } finally {
+      setHistoryLoading(false)
+    }
+  }
+
   function startEdit(order: ShopOrder) {
     setSelected(order)
     setTotalInput(String(order.total))
     setError(null)
+    void loadHistory(order.id)
   }
 
   function updateSelected(patch: Partial<ShopOrder>) {
@@ -89,7 +87,7 @@ export function OrdersAdminPage() {
       })
       setSelected(saved)
       setTotalInput(String(saved.total))
-      await load()
+      await Promise.all([load(), loadHistory(saved.id)])
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'No se pudo guardar el pedido')
     } finally {
@@ -102,7 +100,7 @@ export function OrdersAdminPage() {
       <div className="container">
         <header className="section-header">
           <h2>Pedidos</h2>
-          <p>Gestiona estado, dirección, precio y notas de cada solicitud.</p>
+          <p>Gestiona estado, dirección, precio y notas. Un cambio de estado envía un correo al cliente.</p>
         </header>
 
         {error && (
@@ -135,7 +133,7 @@ export function OrdersAdminPage() {
                         <td>{order.id}</td>
                         <td>
                           {order.customerName}
-                          <div className="muted-cell">{formatDate(order.createdAt)}</div>
+                          <div className="muted-cell">{formatOrderDate(order.createdAt)}</div>
                         </td>
                         <td>
                           <span className={`status-badge status-${order.status}`}>
@@ -162,7 +160,7 @@ export function OrdersAdminPage() {
             ) : (
               <>
                 <h3>Pedido #{selected.id}</h3>
-                <p className="cart-note">Creado {formatDate(selected.createdAt)}</p>
+                <p className="cart-note">Creado {formatOrderDate(selected.createdAt)}</p>
                 <div>
                   <label htmlFor="order-status">Estado</label>
                   <select
@@ -176,6 +174,7 @@ export function OrdersAdminPage() {
                       </option>
                     ))}
                   </select>
+                  <p className="cart-note">Si cambia el estado, avisamos al cliente por correo.</p>
                 </div>
                 <div>
                   <label htmlFor="order-customer">Nombre</label>
@@ -271,6 +270,8 @@ export function OrdersAdminPage() {
                 <Button type="submit" disabled={saving}>
                   {saving ? 'Guardando…' : 'Guardar cambios'}
                 </Button>
+                <h4 className="order-history-heading">Historial</h4>
+                <OrderHistory events={history} loading={historyLoading} error={historyError} />
               </>
             )}
           </form>

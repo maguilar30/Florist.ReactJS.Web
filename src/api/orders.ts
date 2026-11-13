@@ -1,5 +1,5 @@
 import { apiRequest } from './client'
-import type { OrderRequest, OrderResponse, OrderUpdate, ShopOrder } from '../types'
+import type { OrderHistoryEvent, OrderRequest, OrderResponse, OrderUpdate, ShopOrder } from '../types'
 
 export async function requestOrder(payload: OrderRequest): Promise<OrderResponse> {
   return apiRequest<OrderResponse>('/orders', {
@@ -10,6 +10,22 @@ export async function requestOrder(payload: OrderRequest): Promise<OrderResponse
 
 export async function fetchOrders(): Promise<ShopOrder[]> {
   return apiRequest<ShopOrder[]>('/orders')
+}
+
+export async function fetchMyOrders(): Promise<ShopOrder[]> {
+  return apiRequest<ShopOrder[]>('/orders/mine')
+}
+
+export async function fetchMyOrderById(id: number): Promise<ShopOrder> {
+  return apiRequest<ShopOrder>(`/orders/mine/${id}`)
+}
+
+export async function fetchMyOrderHistory(id: number): Promise<OrderHistoryEvent[]> {
+  return apiRequest<OrderHistoryEvent[]>(`/orders/mine/${id}/history`)
+}
+
+export async function fetchOrderHistory(id: number): Promise<OrderHistoryEvent[]> {
+  return apiRequest<OrderHistoryEvent[]>(`/orders/${id}/history`)
 }
 
 export async function fetchOrderById(id: number): Promise<ShopOrder> {

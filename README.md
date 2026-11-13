@@ -33,7 +33,8 @@ During development, requests to `/api/*` are proxied to `VITE_API_PROXY_TARGET` 
 - Public catalog and product detail (live data from `GET /api/products`)
 - Local cart (`localStorage`), delivery fees, and **Solicitar pedido** (`POST /api/orders`)
 - Login, register, and profile (`/api/auth/*`)
-- Admin: products, CRM customers + registered clients, and orders (status, address, fee, total, notes)
+- Account page lists the signed-in user's orders (`GET /api/orders/mine`) and each order's history
+- Admin: products, CRM customers + registered clients, orders (status, address, fee, total, notes, history), and contact messages
 
 If the catalog request fails, the products page falls back to a small demo list so the layout still works.
 
@@ -58,6 +59,8 @@ JSON field names below are camelCase as the UI expects.
 |--------|------|------|------|
 | POST | `/api/auth/login` | No | `{ email, password }` |
 | POST | `/api/auth/register` | No | `{ email, password, fullName, phone? }` |
+| POST | `/api/auth/forgot-password` | No | `{ email }` |
+| POST | `/api/auth/reset-password` | No | `{ token, password }` |
 | GET | `/api/auth/me` | Bearer JWT | — |
 
 Users with role `Admin` (case-insensitive) see **Pedidos**, **Productos**, and **Clientes**.
@@ -76,17 +79,22 @@ Users with role `Admin` (case-insensitive) see **Pedidos**, **Productos**, and *
 |--------|------|------|
 | GET / POST / PUT / DELETE | `/api/customers` | Admin |
 | GET | `/api/clients` | Admin |
+| POST | `/api/contact-messages` | No (contact form) |
+| GET / PATCH / DELETE | `/api/contact-messages` | Admin |
 
 ### Orders
 
 | Method | Path | Auth |
 |--------|------|------|
-| POST | `/api/orders` | No (cart checkout) |
+| POST | `/api/orders` | No (cart checkout; linked to the user if logged in) |
+| GET | `/api/orders/mine` | JWT (own orders) |
+| GET | `/api/orders/mine/{id}/history` | JWT (own order timeline) |
 | GET / PUT | `/api/orders` | Admin |
+| GET | `/api/orders/{id}/history` | Admin |
 
 Checkout body includes `customerName`, `customerEmail`, `customerPhone`, optional `deliveryAddress` / `notes`, `deliveryOption`, and `items: [{ productId, quantity }]`.
 
-Admin order statuses: pago pendiente, pagado, en preparación, listo para recoger, en camino, entregado, cancelado.
+Admin order statuses: pago pendiente, pagado, en preparación, listo para recoger, en camino, entregado, cancelado. Changing status emails the customer after the update is saved. Creation, status changes, and completion (`delivered`) are stored in order history.
 
 ## Scripts
 
@@ -104,10 +112,13 @@ Admin order statuses: pago pendiente, pagado, en preparación, listo para recoge
 | `/productos/:id` | Product detail |
 | `/carrito` | Cart, delivery option, order request |
 | `/login`, `/registro` | Authentication |
-| `/cuenta` | Profile (authenticated) |
+| `/olvide-contrasena` | Request a password-reset email |
+| `/restablecer-contrasena` | Set a new password from the email link |
+| `/cuenta` | Profile and own orders (authenticated) |
 | `/admin/pedidos` | Order management (admin) |
 | `/admin/productos` | Catalog CRUD (admin) |
 | `/admin/clientes` | CRM customers and registered clients (admin) |
+| `/admin/mensajes` | Contact form inbox (admin) |
 | `/contacto` | Contact |
 
 ## Project layout

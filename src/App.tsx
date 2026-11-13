@@ -5,15 +5,18 @@ import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
 import { AccountPage } from './pages/AccountPage'
 import { CartPage } from './pages/CartPage'
+import { ContactMessagesAdminPage } from './pages/ContactMessagesAdminPage'
 import { ContactPage } from './pages/ContactPage'
 import { CustomersPage } from './pages/CustomersPage'
 import { HomePage } from './pages/HomePage'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { LoginPage } from './pages/LoginPage'
 import { ProductDetailPage } from './pages/ProductDetailPage'
 import { OrdersAdminPage } from './pages/OrdersAdminPage'
 import { ProductsAdminPage } from './pages/ProductsAdminPage'
 import { ProductsPage } from './pages/ProductsPage'
 import { RegisterPage } from './pages/RegisterPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 
 export default function App() {
   return (
@@ -29,6 +32,8 @@ export default function App() {
               <Route path="contacto" element={<ContactPage />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="registro" element={<RegisterPage />} />
+              <Route path="olvide-contrasena" element={<ForgotPasswordPage />} />
+              <Route path="restablecer-contrasena" element={<ResetPasswordPage />} />
               <Route
                 path="cuenta"
                 element={
@@ -58,6 +63,14 @@ export default function App() {
                 element={
                   <ProtectedRoute adminOnly>
                     <CustomersPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="admin/mensajes"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <ContactMessagesAdminPage />
                   </ProtectedRoute>
                 }
               />

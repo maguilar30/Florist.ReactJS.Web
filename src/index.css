@@ -904,6 +904,108 @@ textarea {
   font-size: 0.9rem;
 }
 
+.account-orders-header {
+  margin-top: 2.5rem;
+}
+
+.account-order-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.account-order + .account-order {
+  border-top: 1px solid rgba(92, 107, 90, 0.15);
+}
+
+.account-order-toggle {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.75rem;
+  align-items: center;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0.9rem 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.account-order-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-weight: 600;
+}
+
+.account-order-detail {
+  padding: 0 0 1rem;
+}
+
+.contact-message-body {
+  white-space: pre-wrap;
+  margin: 1rem 0;
+  line-height: 1.5;
+}
+
+.order-history-heading {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.order-history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-left: 2px solid rgba(92, 107, 90, 0.2);
+}
+
+.order-history-item {
+  position: relative;
+  padding: 0.35rem 0 0.85rem 1rem;
+}
+
+.order-history-item::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: 0.55rem;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-sage);
+}
+
+.order-history-item.event-completed::before {
+  background: var(--color-rose);
+}
+
+.order-history-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.2rem;
+}
+
+.event-badge {
+  font-size: 0.7rem;
+}
+
+.event-created {
+  background: rgba(92, 107, 90, 0.12);
+}
+
+.event-status_changed {
+  background: rgba(201, 168, 154, 0.3);
+}
+
+.event-completed {
+  background: rgba(92, 107, 90, 0.22);
+}
+
 .status-badge {
   display: inline-block;
   padding: 0.2rem 0.55rem;

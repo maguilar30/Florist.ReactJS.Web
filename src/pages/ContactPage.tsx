@@ -1,12 +1,36 @@
 import { useState, type FormEvent } from 'react'
+import { sendContactMessage } from '../api/contact'
+import { ApiError } from '../api/client'
+import { Button } from '../components/ui/Button'
 
 export function ContactPage() {
-  const [sent, setSent] = useState(false)
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [message, setMessage] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setSent(true)
-    e.currentTarget.reset()
+    setError(null)
+    setSuccess(null)
+    setSubmitting(true)
+    try {
+      const result = await sendContactMessage({
+        name: name.trim(),
+        email: email.trim(),
+        message: message.trim(),
+      })
+      setSuccess(result.message || 'Gracias por escribirnos. Te contactaremos pronto.')
+      setName('')
+      setEmail('')
+      setMessage('')
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'No se pudo enviar el mensaje')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -38,18 +62,39 @@ export function ContactPage() {
         </div>
 
         <form className="contact-form card" onSubmit={handleSubmit}>
-          {sent && (
+          {error && (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          )}
+          {success && (
             <p className="banner banner-success" role="status">
-              Gracias por escribirnos. Te contactaremos pronto.
+              {success}
             </p>
           )}
           <div>
             <label htmlFor="name">Nombre</label>
-            <input type="text" id="name" name="name" required autoComplete="name" />
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              autoComplete="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
           <div>
             <label htmlFor="email">Correo electrónico</label>
-            <input type="email" id="email" name="email" required autoComplete="email" />
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
           <div>
             <label htmlFor="message">Mensaje</label>
@@ -58,11 +103,13 @@ export function ContactPage() {
               name="message"
               required
               placeholder="Fecha del evento, tipo de arreglo…"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
             />
           </div>
-          <button type="submit" className="btn btn-primary">
-            Enviar mensaje
-          </button>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? 'Enviando…' : 'Enviar mensaje'}
+          </Button>
         </form>
       </div>
     </section>

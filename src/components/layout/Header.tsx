@@ -45,12 +45,18 @@ export function Header() {
               <NavLink to="/admin/clientes" onClick={closeNav}>
                 Clientes
               </NavLink>
+              <NavLink to="/admin/mensajes" onClick={closeNav}>
+                Mensajes
+              </NavLink>
             </>
           )}
           {isAuthenticated ? (
             <>
               <NavLink to="/cuenta" onClick={closeNav}>
                 {user?.fullName.split(' ')[0]}
+              </NavLink>
+              <NavLink to="/cuenta#pedidos" onClick={closeNav}>
+                Mis pedidos
               </NavLink>
               <button type="button" className="nav-link-btn" onClick={() => { logout(); closeNav() }}>
                 Salir
