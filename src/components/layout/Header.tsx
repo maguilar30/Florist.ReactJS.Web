@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useCart } from '../../context/CartContext'
+import { HeaderIcon } from './HeaderIcons'
 
 export function Header() {
   const [navOpen, setNavOpen] = useState(false)
@@ -15,46 +16,67 @@ export function Header() {
   return (
     <header className="site-header">
       <div className="container header-inner">
-        <Link to="/" className="logo-link" onClick={closeNav}>
-          <img
-            src="https://yadacr.com/image/catalog/images/Logo/logo_sin_fondo.png"
-            height={56}
-            width={168}
-            title="Floristería Yada"
-            alt="Floristería Yada"
-            className="logo-img"
-          />
-        </Link>
-
-        <nav className={`nav ${navOpen ? 'is-open' : ''}`} id="main-nav" aria-label="Principal">
-          <NavLink to="/" end onClick={closeNav}>
-            Inicio
-          </NavLink>
-          <NavLink to="/productos" onClick={closeNav}>
-            Colección
-          </NavLink>
-          <NavLink to="/contacto" onClick={closeNav}>
-            Contacto
-          </NavLink>
+        <div className="header-brand">
+          <Link to="/" className="logo-link" onClick={closeNav}>
+            <img
+              src="https://yadacr.com/image/catalog/images/Logo/logo_sin_fondo.png"
+              height={56}
+              width={168}
+              title="Floristería Yada"
+              alt="Floristería Yada"
+              className="logo-img"
+            />
+          </Link>
           {isAdmin && (
-            <Link to="/admin" className={adminActive ? 'active' : undefined} onClick={closeNav}>
+            <Link
+              to="/admin"
+              className={`btn btn-outline header-admin-btn${adminActive ? ' is-active' : ''}`}
+              onClick={closeNav}
+            >
+              <HeaderIcon name="admin" />
               Admin
             </Link>
           )}
+        </div>
+
+        <nav className={`nav ${navOpen ? 'is-open' : ''}`} id="main-nav" aria-label="Principal">
+          <NavLink to="/" end onClick={closeNav}>
+            <HeaderIcon name="home" />
+            Inicio
+          </NavLink>
+          <NavLink to="/productos" onClick={closeNav}>
+            <HeaderIcon name="collection" />
+            Colección
+          </NavLink>
+          <NavLink to="/contacto" onClick={closeNav}>
+            <HeaderIcon name="contact" />
+            Contacto
+          </NavLink>
           {isAuthenticated ? (
             <>
               <NavLink to="/cuenta" onClick={closeNav}>
+                <HeaderIcon name="user" />
                 Mi cuenta
               </NavLink>
               <NavLink to="/mis-pedidos" onClick={closeNav}>
+                <HeaderIcon name="orders" />
                 Mis pedidos
               </NavLink>
-              <button type="button" className="nav-link-btn" onClick={() => { logout(); closeNav() }}>
+              <button
+                type="button"
+                className="nav-link-btn"
+                onClick={() => {
+                  logout()
+                  closeNav()
+                }}
+              >
+                <HeaderIcon name="logout" />
                 Salir
               </button>
             </>
           ) : (
             <NavLink to="/login" onClick={closeNav}>
+              <HeaderIcon name="login" />
               Entrar
             </NavLink>
           )}

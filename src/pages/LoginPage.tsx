@@ -3,12 +3,26 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { Button } from '../components/ui/Button'
+import type { User } from '../types'
+
+function isAdminUser(user: Pick<User, 'roles'>) {
+  return user.roles.some((role) => role.toLowerCase() === 'admin')
+}
+
+function afterLoginPath(admin: boolean, from?: string) {
+  if (admin) {
+    if (from?.startsWith('/admin')) return from
+    return '/admin'
+  }
+  if (from && from !== '/login' && !from.startsWith('/admin')) return from
+  return '/'
+}
 
 export function LoginPage() {
-  const { login, isAuthenticated } = useAuth()
+  const { login, isAuthenticated, isAdmin } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const from = (location.state as { from?: string } | null)?.from ?? '/'
+  const from = (location.state as { from?: string } | null)?.from
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -17,17 +31,17 @@ export function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(from, { replace: true })
+      navigate(afterLoginPath(isAdmin, from), { replace: true })
     }
-  }, [isAuthenticated, navigate, from])
+  }, [isAuthenticated, isAdmin, navigate, from])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
     setSubmitting(true)
     try {
-      await login({ email, password })
-      navigate(from, { replace: true })
+      const user = await login({ email, password })
+      navigate(afterLoginPath(isAdminUser(user), from), { replace: true })
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'No se pudo iniciar sesión')
     } finally {

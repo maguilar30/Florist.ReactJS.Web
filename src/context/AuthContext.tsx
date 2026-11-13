@@ -16,7 +16,7 @@ interface AuthContextValue {
   isLoading: boolean
   isAuthenticated: boolean
   isAdmin: boolean
-  login: (payload: LoginRequest) => Promise<void>
+  login: (payload: LoginRequest) => Promise<User>
   register: (payload: RegisterRequest) => Promise<void>
   logout: () => void
   refreshUser: () => Promise<void>
@@ -54,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (payload: LoginRequest) => {
     const { user: loggedIn } = await authApi.login(payload)
     setUser(loggedIn)
+    return loggedIn
   }, [])
 
   const register = useCallback(async (payload: RegisterRequest) => {
