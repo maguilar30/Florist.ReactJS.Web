@@ -49,6 +49,36 @@ export interface ProductCategory {
   sortOrder: number
 }
 
+export interface DiscountCode {
+  id: number
+  code: string
+  description: string
+  percent: number
+  maxDiscount: number
+  maxRedemptions: number
+  redemptionCount: number
+  expiresAt: string
+}
+
+export interface DiscountCodeUpsert {
+  code: string
+  description: string
+  percent: number
+  maxDiscount: number
+  maxRedemptions: number
+  expiresAt: string
+}
+
+export interface DiscountPreview {
+  code: string
+  description: string
+  percent: number
+  maxDiscount: number
+  discountAmount: number
+  remaining: number
+  expiresAt: string
+}
+
 export interface Customer {
   id: number
   fullName: string
@@ -73,7 +103,51 @@ export interface Client {
   fullName: string
   phone?: string
   roles: string[]
+  stars?: number
   createdAt?: string
+}
+
+export type LoyaltyKind = 'percent' | 'free_delivery' | 'custom'
+
+export interface LoyaltyReward {
+  id: number
+  name: string
+  description: string
+  ordersRequired: number
+  kind: LoyaltyKind
+  percent: number
+  maxDiscount: number
+  active: boolean
+}
+
+export interface LoyaltyRewardUpsert {
+  name: string
+  description: string
+  ordersRequired: number
+  kind: LoyaltyKind
+  percent: number
+  maxDiscount: number
+  active: boolean
+}
+
+export interface LoyaltyRewardProgress extends LoyaltyReward {
+  starsToward: number
+  remaining: number
+  redeemedCount: number
+  available: boolean
+}
+
+export interface LoyaltyMe {
+  stars: number
+  qualifyingOrders: number
+  rewards: LoyaltyRewardProgress[]
+}
+
+export interface LoyaltyMember {
+  userId: string
+  email: string
+  fullName: string
+  stars: number
 }
 
 export interface CartItem {
@@ -132,6 +206,10 @@ export interface ShopOrder {
   deliveryOption: string
   subtotal: number
   deliveryFee: number
+  discountCode?: string | null
+  discountAmount?: number
+  loyaltyReward?: string | null
+  loyaltyDiscountAmount?: number
   total: number
   items: OrderItem[]
   createdAt?: string
@@ -145,7 +223,13 @@ export interface OrderRequest {
   deliveryAddress?: string
   deliveryOption: string
   notes?: string
+  discountCode?: string
+  loyaltyRewardId?: number
   items: { productId: number; quantity: number }[]
+}
+
+export interface AdminOrderRequest extends OrderRequest {
+  userId?: string
 }
 
 export interface OrderUpdate {

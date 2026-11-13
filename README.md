@@ -36,9 +36,9 @@ During development, requests to `/api/*` are proxied to `VITE_API_PROXY_TARGET` 
 - Public catalog and product detail (live data from `GET /api/products`)
 - Local cart (`localStorage`), delivery fees from `GET /api/delivery-fees`, and **Solicitar pedido** (`POST /api/orders`)
 - Login, register, and profile (`/api/auth/*`)
-- Account page shows the signed-in profile; **Mis pedidos** lists that user's orders (`GET /api/orders/mine`) and each order's history
+- Account page shows the signed-in profile and loyalty stars (one star per delivered order); **Mis pedidos** lists that user's orders (`GET /api/orders/mine`) and each order's history
 - Contact page and footer load shop address, phone, hours, email, and social links from `GET /api/contact-info`
-- Admin: products, product categories, CRM customers + registered clients, orders, contact messages, shop contact details, and delivery fees
+- Admin: products, product categories, CRM customers + registered clients, orders (including creating an order for a customer), discount codes (with an overall redemption cap), loyalty rewards, contact messages, shop contact details, and delivery fees
 
 If the catalog request fails, the products page falls back to a small demo list so the layout still works.
 
@@ -86,12 +86,19 @@ Users with role `Admin` (case-insensitive) see **Pedidos**, **Productos**, and *
 | PUT | `/api/contact-info` | Admin |
 | GET | `/api/delivery-fees` | No |
 | PUT | `/api/delivery-fees` | Admin |
+| GET / POST / PUT / DELETE | `/api/discount-codes` | Admin |
+| POST | `/api/discount-codes/preview` | No (optional JWT) |
+| GET | `/api/loyalty/me` | JWT |
+| GET | `/api/loyalty/accounts/{userId}` | Admin |
+| GET | `/api/loyalty/members` | Admin |
+| GET / POST / PUT / DELETE | `/api/loyalty/rewards` | Admin |
 
 ### Orders
 
 | Method | Path | Auth |
 |--------|------|------|
 | POST | `/api/orders` | No (cart checkout; linked to the user if logged in) |
+| POST | `/api/orders/admin` | Admin (order on behalf of a customer; optional `userId`) |
 | GET | `/api/orders/mine` | JWT (own orders) |
 | GET | `/api/orders/mine/{id}/history` | JWT (own order timeline) |
 | GET / PUT | `/api/orders` | Admin |

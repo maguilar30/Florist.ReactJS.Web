@@ -4,9 +4,15 @@ import { requestOrder } from '../api/orders'
 import { ApiError } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
+import { DiscountCodeField } from '../components/DiscountCodeField'
+import { LoyaltyRewardField } from '../components/LoyaltyRewardField'
+import { type AppliedDiscount, computeDiscountAmount } from '../discount'
+import { loyaltyDiscountAmount, loyaltyWaivesDelivery } from '../loyalty'
 import { deliveryFeeFor, requiresAddress } from '../delivery'
 import { useDeliveryOptions } from '../hooks/useDeliveryOptions'
+import { formatMoney } from '../money'
 import { Button } from '../components/ui/Button'
+import type { LoyaltyRewardProgress } from '../types'
 
 export function CartPage() {
   const { items, subtotal, updateQuantity, removeItem, clearCart } = useCart()
@@ -18,6 +24,8 @@ export function CartPage() {
   const deliveryOptions = useDeliveryOptions()
   const [deliveryOption, setDeliveryOption] = useState('pickup')
   const [notes, setNotes] = useState('')
+  const [appliedDiscount, setAppliedDiscount] = useState<AppliedDiscount | null>(null)
+  const [appliedLoyalty, setAppliedLoyalty] = useState<LoyaltyRewardProgress | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
@@ -34,8 +42,14 @@ export function CartPage() {
     }
   }, [deliveryOptions, deliveryOption])
 
-  const shippingFee = deliveryFeeFor(deliveryOption, deliveryOptions)
+  const shippingFee = loyaltyWaivesDelivery(appliedLoyalty)
+    ? 0
+    : deliveryFeeFor(deliveryOption, deliveryOptions)
   const needsAddress = requiresAddress(deliveryOption, deliveryOptions)
+  const discountAmount = appliedDiscount
+    ? computeDiscountAmount(subtotal, appliedDiscount.percent, appliedDiscount.maxDiscount)
+    : 0
+  const loyaltyAmount = appliedLoyalty ? loyaltyDiscountAmount(appliedLoyalty, subtotal) : 0
 
   async function handleRequestOrder(e: FormEvent) {
     e.preventDefault()
@@ -49,6 +63,8 @@ export function CartPage() {
         deliveryAddress: deliveryAddress.trim() || undefined,
         deliveryOption,
         notes: notes.trim() || undefined,
+        discountCode: appliedDiscount?.code,
+        loyaltyRewardId: appliedLoyalty?.id,
         items: items.map(({ product, quantity }) => ({
           productId: product.id,
           quantity,
@@ -133,7 +149,7 @@ export function CartPage() {
                   <Link to={`/productos/${product.id}`}>
                     <strong>{product.name}</strong>
                   </Link>
-                  <p className="price">${product.price.toFixed(2)} c/u</p>
+                  <p className="price">{formatMoney(product.price)} c/u</p>
                   <div className="qty-row">
                     <label htmlFor={`qty-${product.id}`} className="sr-only">
                       Cantidad
@@ -151,7 +167,7 @@ export function CartPage() {
                     </button>
                   </div>
                 </div>
-                <p className="cart-line-total">${(product.price * quantity).toFixed(2)}</p>
+                <p className="cart-line-total">{formatMoney(product.price * quantity)}</p>
               </li>
             ))}
           </ul>
@@ -159,13 +175,25 @@ export function CartPage() {
           <aside className="cart-summary card">
             <h3>Resumen</h3>
             <p className="cart-subtotal">
-              Subtotal <strong>${subtotal.toFixed(2)}</strong>
+              Subtotal <strong>{formatMoney(subtotal)}</strong>
             </p>
+            {discountAmount > 0 && (
+              <p className="cart-subtotal">
+                Descuento{appliedDiscount ? ` (${appliedDiscount.code})` : ''}{' '}
+                <strong>−{formatMoney(discountAmount)}</strong>
+              </p>
+            )}
+            {(loyaltyAmount > 0 || appliedLoyalty) && (
+              <p className="cart-subtotal">
+                Fidelidad{appliedLoyalty ? ` (${appliedLoyalty.name})` : ''}{' '}
+                <strong>{loyaltyAmount > 0 ? `−${formatMoney(loyaltyAmount)}` : 'canjeada'}</strong>
+              </p>
+            )}
             <p className="cart-subtotal">
-              Envío <strong>${shippingFee.toFixed(2)}</strong>
+              Envío <strong>{formatMoney(shippingFee)}</strong>
             </p>
             <p className="cart-subtotal cart-total">
-              Total <strong>${(subtotal + shippingFee).toFixed(2)}</strong>
+              Total <strong>{formatMoney(subtotal - discountAmount - loyaltyAmount + shippingFee)}</strong>
             </p>
             <p className="cart-note">
               No se cobra en línea. Recibirás un mensaje para coordinar el pago.
@@ -188,7 +216,7 @@ export function CartPage() {
                       />
                       <span>
                         {option.label}
-                        {option.fee === 0 ? ' — Gratis' : ` — $${option.fee.toFixed(2)}`}
+                        {option.fee === 0 ? ' — Gratis' : ` — ${formatMoney(option.fee)}`}
                       </span>
                     </label>
                   ))
@@ -212,7 +240,11 @@ export function CartPage() {
                   required
                   autoComplete="email"
                   value={customerEmail}
-                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  onChange={(e) => {
+                    setCustomerEmail(e.target.value)
+                    setAppliedDiscount(null)
+                    setAppliedLoyalty(null)
+                  }}
                 />
               </div>
               <div>
@@ -242,6 +274,24 @@ export function CartPage() {
                   }
                 />
               </div>
+              <DiscountCodeField
+                email={customerEmail}
+                subtotal={subtotal}
+                applied={appliedDiscount}
+                onApplied={(value) => {
+                  setAppliedDiscount(value)
+                  if (value) setAppliedLoyalty(null)
+                }}
+              />
+              <LoyaltyRewardField
+                loggedIn={Boolean(user)}
+                subtotal={subtotal}
+                applied={appliedLoyalty}
+                onApplied={(value) => {
+                  setAppliedLoyalty(value)
+                  if (value) setAppliedDiscount(null)
+                }}
+              />
               <div>
                 <label htmlFor="order-notes">Notas (opcional)</label>
                 <textarea

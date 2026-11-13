@@ -6,6 +6,7 @@ import { OrderHistory } from '../components/OrderHistory'
 import { Spinner } from '../components/ui/Spinner'
 import { deliveryLabel } from '../delivery'
 import { useDeliveryOptions } from '../hooks/useDeliveryOptions'
+import { formatMoney } from '../money'
 import { formatOrderDate, orderStatusLabel } from '../orderStatus'
 import type { OrderHistoryEvent, ShopOrder } from '../types'
 
@@ -105,7 +106,7 @@ export function MyOrdersPage() {
                       <span className={`status-badge status-${order.status}`}>
                         {orderStatusLabel(order.status)}
                       </span>
-                      <strong>${order.total.toFixed(2)}</strong>
+                      <strong>{formatMoney(order.total)}</strong>
                     </button>
                     {open && (
                       <div className="account-order-detail">
@@ -117,13 +118,23 @@ export function MyOrdersPage() {
                         <ul className="order-items">
                           {order.items.map((item) => (
                             <li key={item.id}>
-                              {item.quantity} × {item.name} — ${item.lineTotal.toFixed(2)}
+                              {item.quantity} × {item.name} — {formatMoney(item.lineTotal)}
                             </li>
                           ))}
                         </ul>
                         <p className="cart-note">
-                          Subtotal ${Number(order.subtotal ?? 0).toFixed(2)} · Envío $
-                          {Number(order.deliveryFee ?? 0).toFixed(2)}
+                          Subtotal {formatMoney(Number(order.subtotal ?? 0))}
+                          {Number(order.discountAmount ?? 0) > 0
+                            ? ` · Descuento (${order.discountCode ?? 'código'}) −${formatMoney(Number(order.discountAmount))}`
+                            : ''}
+                          {order.loyaltyReward
+                            ? ` · Fidelidad (${order.loyaltyReward})${
+                                Number(order.loyaltyDiscountAmount ?? 0) > 0
+                                  ? ` −${formatMoney(Number(order.loyaltyDiscountAmount))}`
+                                  : ''
+                              }`
+                            : ''}{' '}
+                          · Envío {formatMoney(Number(order.deliveryFee ?? 0))}
                         </p>
                         <h4 className="order-history-heading">Historial</h4>
                         <OrderHistory

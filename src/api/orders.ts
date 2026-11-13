@@ -1,8 +1,15 @@
 import { apiRequest } from './client'
-import type { OrderHistoryEvent, OrderRequest, OrderResponse, OrderUpdate, ShopOrder } from '../types'
+import type { AdminOrderRequest, OrderHistoryEvent, OrderRequest, OrderResponse, OrderUpdate, ShopOrder } from '../types'
 
 export async function requestOrder(payload: OrderRequest): Promise<OrderResponse> {
   return apiRequest<OrderResponse>('/orders', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function createAdminOrder(payload: AdminOrderRequest): Promise<OrderResponse> {
+  return apiRequest<OrderResponse>('/orders/admin', {
     method: 'POST',
     body: JSON.stringify(payload),
   })

@@ -17,6 +17,7 @@ import {
 } from '../components/admin/TableFilters'
 import { Button } from '../components/ui/Button'
 import { Spinner } from '../components/ui/Spinner'
+import { formatMoney } from '../money'
 import type { Product, ProductCategory, ProductUpsert } from '../types'
 
 const emptyForm: ProductUpsert = {
@@ -67,10 +68,10 @@ export function ProductsAdminPage() {
       const price = product.price.toFixed(2)
       const stock = product.inStock ? 'Sí' : 'No'
       return (
-        matchesSearch(search, product.name, product.description, product.category, price, stock) &&
+        matchesSearch(search, product.name, product.description, product.category, price, formatMoney(product.price), stock) &&
         matchesSearch(nameFilter, product.name) &&
         (!categoryFilter || (product.category ?? '') === categoryFilter) &&
-        matchesSearch(priceFilter, price, `$${price}`) &&
+        matchesSearch(priceFilter, price, formatMoney(product.price)) &&
         (!stockFilter || (product.inStock ? 'yes' : 'no') === stockFilter)
       )
     })
@@ -294,7 +295,7 @@ export function ProductsAdminPage() {
                           <tr key={product.id}>
                             <td>{product.name}</td>
                             <td>{product.category ?? '—'}</td>
-                            <td>${product.price.toFixed(2)}</td>
+                            <td>{formatMoney(product.price)}</td>
                             <td>{product.inStock ? 'Sí' : 'No'}</td>
                             <td className="table-actions">
                               <button type="button" className="link-btn" onClick={() => startEdit(product)}>

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { fetchProductById } from '../api/products'
 import { ApiError } from '../api/client'
 import { useCart } from '../context/CartContext'
+import { formatMoney } from '../money'
 import { Button } from '../components/ui/Button'
 import { Spinner } from '../components/ui/Spinner'
 import type { Product } from '../types'
@@ -80,7 +81,7 @@ export function ProductDetailPage() {
           <p className="hero-badge">{product.category ?? 'Arreglo floral'}</p>
           <h1>{product.name}</h1>
           <p className="product-detail-desc">{product.description}</p>
-          <p className="price price-lg">${product.price.toFixed(2)}</p>
+          <p className="price price-lg">{formatMoney(product.price)}</p>
           <div className="hero-actions">
             <Button disabled={!product.inStock} onClick={() => addItem(product)}>
               {product.inStock ? 'Agregar al carrito' : 'Agotado'}

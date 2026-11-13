@@ -72,7 +72,14 @@ export function CustomersPage() {
   const filteredClients = useMemo(() => {
     return clients.filter(
       (client) =>
-        matchesSearch(clientSearch, client.fullName, client.email, client.phone, client.roles.join(' ')) &&
+        matchesSearch(
+          clientSearch,
+          client.fullName,
+          client.email,
+          client.phone,
+          client.roles.join(' '),
+          String(client.stars ?? ''),
+        ) &&
         matchesSearch(clientNameFilter, client.fullName) &&
         matchesSearch(clientEmailFilter, client.email) &&
         matchesSearch(clientPhoneFilter, client.phone) &&
@@ -309,6 +316,7 @@ export function CustomersPage() {
                       <th>Correo</th>
                       <th>Teléfono</th>
                       <th>Rol</th>
+                      <th>Estrellas</th>
                     </tr>
                     <tr className="filter-row">
                       <th>
@@ -343,6 +351,7 @@ export function CustomersPage() {
                           label="Filtrar rol"
                         />
                       </th>
+                      <th />
                     </tr>
                   </thead>
                   <tbody>
@@ -355,6 +364,7 @@ export function CustomersPage() {
                           <td>{client.email}</td>
                           <td>{client.phone ?? '—'}</td>
                           <td>{client.roles.join(', ') || 'Customer'}</td>
+                          <td>{client.stars ?? 0}</td>
                         </tr>
                       ))
                     )}

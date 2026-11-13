@@ -11,8 +11,11 @@ import { CategoriesAdminPage } from './pages/CategoriesAdminPage'
 import { ContactInfoAdminPage } from './pages/ContactInfoAdminPage'
 import { ContactMessagesAdminPage } from './pages/ContactMessagesAdminPage'
 import { ContactPage } from './pages/ContactPage'
+import { CreateOrderAdminPage } from './pages/CreateOrderAdminPage'
 import { CustomersPage } from './pages/CustomersPage'
 import { DeliveryFeesAdminPage } from './pages/DeliveryFeesAdminPage'
+import { DiscountsAdminPage } from './pages/DiscountsAdminPage'
+import { LoyaltyAdminPage } from './pages/LoyaltyAdminPage'
 import { HomePage } from './pages/HomePage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { LoginPage } from './pages/LoginPage'
@@ -65,12 +68,15 @@ export default function App() {
               >
                 <Route index element={<Navigate to="pedidos" replace />} />
                 <Route path="pedidos" element={<OrdersAdminPage />} />
+                <Route path="nuevo-pedido" element={<CreateOrderAdminPage />} />
                 <Route path="productos" element={<ProductsAdminPage />} />
                 <Route path="categorias" element={<CategoriesAdminPage />} />
                 <Route path="clientes" element={<CustomersPage />} />
                 <Route path="mensajes" element={<ContactMessagesAdminPage />} />
                 <Route path="contacto" element={<ContactInfoAdminPage />} />
                 <Route path="envio" element={<DeliveryFeesAdminPage />} />
+                <Route path="descuentos" element={<DiscountsAdminPage />} />
+                <Route path="fidelidad" element={<LoyaltyAdminPage />} />
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>

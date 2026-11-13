@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import type { Product } from '../types'
 import { useCart } from '../context/CartContext'
+import { formatMoney } from '../money'
 import { Button } from './ui/Button'
 
 const FALLBACK_IMAGE =
@@ -31,7 +32,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </h3>
         <p>{product.description}</p>
         <div className="product-card-footer">
-          <span className="price">${product.price.toFixed(2)}</span>
+          <span className="price">{formatMoney(product.price)}</span>
           <Button
             variant="primary"
             disabled={!product.inStock}

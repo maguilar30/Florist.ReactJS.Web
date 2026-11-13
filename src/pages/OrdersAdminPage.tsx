@@ -7,6 +7,7 @@ import { Button } from '../components/ui/Button'
 import { Spinner } from '../components/ui/Spinner'
 import { deliveryFeeFor, deliveryLabel, requiresAddress } from '../delivery'
 import { useDeliveryOptions } from '../hooks/useDeliveryOptions'
+import { formatMoney } from '../money'
 import { ORDER_STATUS_OPTIONS, formatOrderDate, orderStatusLabel } from '../orderStatus'
 import type { OrderHistoryEvent, OrderStatus, ShopOrder } from '../types'
 
@@ -69,7 +70,7 @@ export function OrdersAdminPage() {
         matchesSearch(idFilter, order.id) &&
         matchesSearch(customerFilter, order.customerName, order.customerEmail) &&
         (!statusFilter || order.status === statusFilter) &&
-        matchesSearch(totalFilter, total, `$${total}`)
+        matchesSearch(totalFilter, total, formatMoney(order.total))
       )
     })
   }, [orders, search, idFilter, customerFilter, statusFilter, totalFilter])
@@ -216,7 +217,7 @@ export function OrdersAdminPage() {
                                 {orderStatusLabel(order.status)}
                               </span>
                             </td>
-                            <td>${order.total.toFixed(2)}</td>
+                            <td>{formatMoney(order.total)}</td>
                             <td className="table-actions">
                               <button type="button" className="link-btn" onClick={() => startEdit(order)}>
                                 Editar
@@ -291,12 +292,14 @@ export function OrdersAdminPage() {
                       const option = e.target.value
                       const fee = deliveryFeeFor(option, deliveryOptions)
                       updateSelected({ deliveryOption: option, deliveryFee: fee })
-                      setTotalInput(((selected.subtotal ?? 0) + fee).toFixed(2))
+                      setTotalInput(
+                        ((selected.subtotal ?? 0) - (selected.discountAmount ?? 0) + fee).toFixed(2),
+                      )
                     }}
                   >
                     {deliveryOptions.map((option) => (
                       <option key={option.code} value={option.code}>
-                        {option.label} — {option.fee === 0 ? 'Gratis' : `$${option.fee.toFixed(2)}`}
+                        {option.label} — {option.fee === 0 ? 'Gratis' : formatMoney(option.fee)}
                       </option>
                     ))}
                   </select>
@@ -312,8 +315,19 @@ export function OrdersAdminPage() {
                   />
                 </div>
                 <p className="cart-note">
-                  Subtotal ${Number(selected.subtotal ?? 0).toFixed(2)} · Envío $
-                  {Number(selected.deliveryFee ?? 0).toFixed(2)} ({deliveryLabel(selected.deliveryOption, deliveryOptions)})
+                  Subtotal {formatMoney(Number(selected.subtotal ?? 0))}
+                  {Number(selected.discountAmount ?? 0) > 0
+                    ? ` · Descuento (${selected.discountCode ?? 'código'}) −${formatMoney(Number(selected.discountAmount))}`
+                    : ''}
+                  {selected.loyaltyReward
+                    ? ` · Fidelidad (${selected.loyaltyReward})${
+                        Number(selected.loyaltyDiscountAmount ?? 0) > 0
+                          ? ` −${formatMoney(Number(selected.loyaltyDiscountAmount))}`
+                          : ''
+                      }`
+                    : ''}{' '}
+                  · Envío {formatMoney(Number(selected.deliveryFee ?? 0))} (
+                  {deliveryLabel(selected.deliveryOption, deliveryOptions)})
                 </p>
                 <div>
                   <label htmlFor="order-total">Total a cobrar</label>
@@ -340,7 +354,7 @@ export function OrdersAdminPage() {
                   <ul className="order-items">
                     {selected.items.map((item) => (
                       <li key={item.id}>
-                        {item.quantity} × {item.name} — ${item.lineTotal.toFixed(2)}
+                        {item.quantity} × {item.name} — {formatMoney(item.lineTotal)}
                       </li>
                     ))}
                   </ul>
