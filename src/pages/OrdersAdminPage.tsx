@@ -5,11 +5,13 @@ import { FilterEmpty, FilterInput, FilterSelect, TableSearch, matchesSearch } fr
 import { OrderHistory } from '../components/OrderHistory'
 import { Button } from '../components/ui/Button'
 import { Spinner } from '../components/ui/Spinner'
-import { DELIVERY_OPTIONS, deliveryFeeFor, deliveryLabel, type DeliveryOption } from '../delivery'
+import { deliveryFeeFor, deliveryLabel, requiresAddress } from '../delivery'
+import { useDeliveryOptions } from '../hooks/useDeliveryOptions'
 import { ORDER_STATUS_OPTIONS, formatOrderDate, orderStatusLabel } from '../orderStatus'
 import type { OrderHistoryEvent, OrderStatus, ShopOrder } from '../types'
 
 export function OrdersAdminPage() {
+  const deliveryOptions = useDeliveryOptions()
   const [orders, setOrders] = useState<ShopOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -286,14 +288,14 @@ export function OrdersAdminPage() {
                     id="order-delivery"
                     value={selected.deliveryOption || 'pickup'}
                     onChange={(e) => {
-                      const option = e.target.value as DeliveryOption
-                      const fee = deliveryFeeFor(option)
+                      const option = e.target.value
+                      const fee = deliveryFeeFor(option, deliveryOptions)
                       updateSelected({ deliveryOption: option, deliveryFee: fee })
                       setTotalInput(((selected.subtotal ?? 0) + fee).toFixed(2))
                     }}
                   >
-                    {DELIVERY_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
+                    {deliveryOptions.map((option) => (
+                      <option key={option.code} value={option.code}>
                         {option.label} — {option.fee === 0 ? 'Gratis' : `$${option.fee.toFixed(2)}`}
                       </option>
                     ))}
@@ -303,7 +305,7 @@ export function OrdersAdminPage() {
                   <label htmlFor="order-address">Dirección de entrega</label>
                   <textarea
                     id="order-address"
-                    required={selected.deliveryOption !== 'pickup'}
+                    required={requiresAddress(selected.deliveryOption, deliveryOptions)}
                     value={selected.deliveryAddress ?? ''}
                     onChange={(e) => updateSelected({ deliveryAddress: e.target.value })}
                     placeholder="Calle, barrio, referencias…"
@@ -311,7 +313,7 @@ export function OrdersAdminPage() {
                 </div>
                 <p className="cart-note">
                   Subtotal ${Number(selected.subtotal ?? 0).toFixed(2)} · Envío $
-                  {Number(selected.deliveryFee ?? 0).toFixed(2)} ({deliveryLabel(selected.deliveryOption)})
+                  {Number(selected.deliveryFee ?? 0).toFixed(2)} ({deliveryLabel(selected.deliveryOption, deliveryOptions)})
                 </p>
                 <div>
                   <label htmlFor="order-total">Total a cobrar</label>

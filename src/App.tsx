@@ -11,6 +11,7 @@ import { ContactInfoAdminPage } from './pages/ContactInfoAdminPage'
 import { ContactMessagesAdminPage } from './pages/ContactMessagesAdminPage'
 import { ContactPage } from './pages/ContactPage'
 import { CustomersPage } from './pages/CustomersPage'
+import { DeliveryFeesAdminPage } from './pages/DeliveryFeesAdminPage'
 import { HomePage } from './pages/HomePage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { LoginPage } from './pages/LoginPage'
@@ -67,6 +68,7 @@ export default function App() {
                 <Route path="clientes" element={<CustomersPage />} />
                 <Route path="mensajes" element={<ContactMessagesAdminPage />} />
                 <Route path="contacto" element={<ContactInfoAdminPage />} />
+                <Route path="envio" element={<DeliveryFeesAdminPage />} />
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>

@@ -4,7 +4,8 @@ import { requestOrder } from '../api/orders'
 import { ApiError } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
-import { DELIVERY_OPTIONS, deliveryFeeFor, type DeliveryOption } from '../delivery'
+import { deliveryFeeFor, requiresAddress } from '../delivery'
+import { useDeliveryOptions } from '../hooks/useDeliveryOptions'
 import { Button } from '../components/ui/Button'
 
 export function CartPage() {
@@ -14,7 +15,8 @@ export function CartPage() {
   const [customerEmail, setCustomerEmail] = useState('')
   const [customerPhone, setCustomerPhone] = useState('')
   const [deliveryAddress, setDeliveryAddress] = useState('')
-  const [deliveryOption, setDeliveryOption] = useState<DeliveryOption>('pickup')
+  const deliveryOptions = useDeliveryOptions()
+  const [deliveryOption, setDeliveryOption] = useState('pickup')
   const [notes, setNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -25,6 +27,15 @@ export function CartPage() {
     setCustomerName((current) => current || user.fullName)
     setCustomerEmail((current) => current || user.email)
   }, [user])
+
+  useEffect(() => {
+    if (!deliveryOptions.some((option) => option.code === deliveryOption)) {
+      setDeliveryOption(deliveryOptions[0]?.code ?? 'pickup')
+    }
+  }, [deliveryOptions, deliveryOption])
+
+  const shippingFee = deliveryFeeFor(deliveryOption, deliveryOptions)
+  const needsAddress = requiresAddress(deliveryOption, deliveryOptions)
 
   async function handleRequestOrder(e: FormEvent) {
     e.preventDefault()
@@ -151,10 +162,10 @@ export function CartPage() {
               Subtotal <strong>${subtotal.toFixed(2)}</strong>
             </p>
             <p className="cart-subtotal">
-              Envío <strong>${deliveryFeeFor(deliveryOption).toFixed(2)}</strong>
+              Envío <strong>${shippingFee.toFixed(2)}</strong>
             </p>
             <p className="cart-subtotal cart-total">
-              Total <strong>${(subtotal + deliveryFeeFor(deliveryOption)).toFixed(2)}</strong>
+              Total <strong>${(subtotal + shippingFee).toFixed(2)}</strong>
             </p>
             <p className="cart-note">
               No se cobra en línea. Recibirás un mensaje para coordinar el pago.
@@ -162,22 +173,26 @@ export function CartPage() {
             <form className="auth-form" onSubmit={handleRequestOrder}>
               <fieldset className="delivery-options">
                 <legend>Entrega</legend>
-                {DELIVERY_OPTIONS.map((option) => (
-                  <label key={option.value} className="checkbox-row" htmlFor={`delivery-${option.value}`}>
-                    <input
-                      id={`delivery-${option.value}`}
-                      type="radio"
-                      name="delivery-option"
-                      value={option.value}
-                      checked={deliveryOption === option.value}
-                      onChange={() => setDeliveryOption(option.value)}
-                    />
-                    <span>
-                      {option.label}
-                      {option.fee === 0 ? ' — Gratis' : ` — $${option.fee.toFixed(2)}`}
-                    </span>
-                  </label>
-                ))}
+                {deliveryOptions.length === 0 ? (
+                  <p className="cart-note">No hay opciones de entrega configuradas.</p>
+                ) : (
+                  deliveryOptions.map((option) => (
+                    <label key={option.code} className="checkbox-row" htmlFor={`delivery-${option.code}`}>
+                      <input
+                        id={`delivery-${option.code}`}
+                        type="radio"
+                        name="delivery-option"
+                        value={option.code}
+                        checked={deliveryOption === option.code}
+                        onChange={() => setDeliveryOption(option.code)}
+                      />
+                      <span>
+                        {option.label}
+                        {option.fee === 0 ? ' — Gratis' : ` — $${option.fee.toFixed(2)}`}
+                      </span>
+                    </label>
+                  ))
+                )}
               </fieldset>
               <div>
                 <label htmlFor="order-name">Nombre</label>
@@ -213,17 +228,17 @@ export function CartPage() {
               </div>
               <div>
                 <label htmlFor="order-address">
-                  Dirección de entrega{deliveryOption === 'pickup' ? ' (opcional)' : ''}
+                  Dirección de entrega{needsAddress ? '' : ' (opcional)'}
                 </label>
                 <textarea
                   id="order-address"
-                  required={deliveryOption !== 'pickup'}
+                  required={needsAddress}
                   value={deliveryAddress}
                   onChange={(e) => setDeliveryAddress(e.target.value)}
                   placeholder={
-                    deliveryOption === 'pickup'
-                      ? 'Opcional si recogerás en tienda'
-                      : 'Indica dónde entregar el pedido'
+                    needsAddress
+                      ? 'Indica dónde entregar el pedido'
+                      : 'Opcional si recogerás en tienda'
                   }
                 />
               </div>
@@ -236,7 +251,7 @@ export function CartPage() {
                   placeholder="Fecha, dirección de entrega, ocasión…"
                 />
               </div>
-              <Button type="submit" fullWidth disabled={submitting}>
+              <Button type="submit" fullWidth disabled={submitting || deliveryOptions.length === 0}>
                 {submitting ? 'Enviando solicitud…' : 'Solicitar pedido'}
               </Button>
             </form>

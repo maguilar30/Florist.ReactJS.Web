@@ -5,10 +5,12 @@ import { ApiError } from '../api/client'
 import { OrderHistory } from '../components/OrderHistory'
 import { Spinner } from '../components/ui/Spinner'
 import { deliveryLabel } from '../delivery'
+import { useDeliveryOptions } from '../hooks/useDeliveryOptions'
 import { formatOrderDate, orderStatusLabel } from '../orderStatus'
 import type { OrderHistoryEvent, ShopOrder } from '../types'
 
 export function MyOrdersPage() {
+  const deliveryOptions = useDeliveryOptions()
   const [orders, setOrders] = useState<ShopOrder[]>([])
   const [loadingOrders, setLoadingOrders] = useState(true)
   const [ordersError, setOrdersError] = useState<string | null>(null)
@@ -108,7 +110,7 @@ export function MyOrdersPage() {
                     {open && (
                       <div className="account-order-detail">
                         <p>
-                          {deliveryLabel(order.deliveryOption)}
+                          {deliveryLabel(order.deliveryOption, deliveryOptions)}
                           {order.deliveryAddress ? ` · ${order.deliveryAddress}` : ''}
                         </p>
                         {order.notes && <p className="cart-note">Notas: {order.notes}</p>}

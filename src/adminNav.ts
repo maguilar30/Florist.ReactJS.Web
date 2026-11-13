@@ -4,4 +4,5 @@ export const ADMIN_MENU = [
   { to: '/admin/clientes', label: 'Clientes' },
   { to: '/admin/mensajes', label: 'Mensajes' },
   { to: '/admin/contacto', label: 'Datos' },
+  { to: '/admin/envio', label: 'Envío' },
 ] as const

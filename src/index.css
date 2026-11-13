@@ -641,6 +641,21 @@ textarea {
   gap: 1rem;
 }
 
+.delivery-fees-admin {
+  max-width: 52rem;
+}
+
+.delivery-fee-row {
+  display: grid;
+  grid-template-columns: 1fr 7.5rem auto auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.delivery-fee-address {
+  padding-bottom: 0.55rem;
+}
+
 .auth-form input[type='checkbox'] {
   width: auto;
   padding: 0;
@@ -1281,6 +1296,10 @@ textarea {
   .admin-menu-title {
     width: 100%;
     margin-bottom: 0.15rem;
+  }
+
+  .delivery-fee-row {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -75,6 +75,15 @@ export interface CartItem {
   quantity: number
 }
 
+export interface DeliveryFee {
+  id: number
+  code: string
+  label: string
+  fee: number
+  requiresAddress: boolean
+  sortOrder: number
+}
+
 export type OrderStatus =
   | 'payment_pending'
   | 'paid'

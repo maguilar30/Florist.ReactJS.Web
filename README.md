@@ -34,22 +34,17 @@ During development, requests to `/api/*` are proxied to `VITE_API_PROXY_TARGET` 
 ## What the SPA does
 
 - Public catalog and product detail (live data from `GET /api/products`)
-- Local cart (`localStorage`), delivery fees, and **Solicitar pedido** (`POST /api/orders`)
+- Local cart (`localStorage`), delivery fees from `GET /api/delivery-fees`, and **Solicitar pedido** (`POST /api/orders`)
 - Login, register, and profile (`/api/auth/*`)
 - Account page shows the signed-in profile; **Mis pedidos** lists that user's orders (`GET /api/orders/mine`) and each order's history
 - Contact page and footer load shop address, phone, hours, email, and social links from `GET /api/contact-info`
-- Admin: products, CRM customers + registered clients, orders (status, address, fee, total, notes, history), contact messages, and shop contact details
+- Admin: products, CRM customers + registered clients, orders, contact messages, shop contact details, and delivery fees
 
 If the catalog request fails, the products page falls back to a small demo list so the layout still works.
 
 ## Delivery fees (cart)
 
-| Option | Fee |
-|--------|-----|
-| Recoger en tienda (`pickup`) | $0 |
-| Hasta 2 km (`up_to_2km`) | $5 |
-| Hasta 5 km (`up_to_5km`) | $10 |
-| Más de 5 km (`over_5km`) | $20 |
+The cart loads options from `GET /api/delivery-fees`. Admins add, edit, and remove options at `/admin/envio` (`PUT /api/delivery-fees`). Defaults are seeded only when a company has none: Recoger en tienda $0, Hasta 2 km $5, Hasta 5 km $10, Más de 5 km $20.
 
 Home delivery requires an address. Checkout emails `info@yadacr.com` (via the API) and stores the order. The shop shows that the team will contact the customer to arrange payment — there is no online charge.
 
@@ -87,6 +82,8 @@ Users with role `Admin` (case-insensitive) see **Pedidos**, **Productos**, and *
 | GET / PATCH / DELETE | `/api/contact-messages` | Admin |
 | GET | `/api/contact-info` | No |
 | PUT | `/api/contact-info` | Admin |
+| GET | `/api/delivery-fees` | No |
+| PUT | `/api/delivery-fees` | Admin |
 
 ### Orders
 
@@ -127,6 +124,7 @@ Admin order statuses: pago pendiente, pagado, en preparación, listo para recoge
 | `/admin/clientes` | CRM customers and registered clients (admin) |
 | `/admin/mensajes` | Contact form inbox (admin) |
 | `/admin/contacto` | Shop contact details (admin) |
+| `/admin/envio` | Delivery fees (admin) |
 | `/contacto` | Contact |
 
 ## Project layout
