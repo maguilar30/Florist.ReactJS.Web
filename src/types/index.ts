@@ -31,6 +31,7 @@ export interface Product {
   price: number
   imageUrl?: string
   category?: string
+  stockQuantity: number
   inStock: boolean
 }
 
@@ -40,7 +41,7 @@ export interface ProductUpsert {
   price: number
   imageUrl?: string
   category?: string
-  inStock: boolean
+  stockQuantity: number
 }
 
 export interface ProductCategory {

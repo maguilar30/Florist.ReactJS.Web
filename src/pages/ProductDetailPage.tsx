@@ -82,6 +82,9 @@ export function ProductDetailPage() {
           <h1>{product.name}</h1>
           <p className="product-detail-desc">{product.description}</p>
           <p className="price price-lg">{formatMoney(product.price)}</p>
+          <p className="product-detail-stock">
+            {product.inStock ? `${product.stockQuantity} unidades disponibles` : 'Producto agotado'}
+          </p>
           <div className="hero-actions">
             <Button disabled={!product.inStock} onClick={() => addItem(product)}>
               {product.inStock ? 'Agregar al carrito' : 'Agotado'}

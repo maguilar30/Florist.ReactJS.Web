@@ -26,7 +26,7 @@ const emptyForm: ProductUpsert = {
   price: 0,
   imageUrl: '',
   category: '',
-  inStock: true,
+  stockQuantity: 0,
 }
 
 export function ProductsAdminPage() {
@@ -66,7 +66,7 @@ export function ProductsAdminPage() {
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const price = product.price.toFixed(2)
-      const stock = product.inStock ? 'Sí' : 'No'
+      const stock = String(product.stockQuantity)
       return (
         matchesSearch(search, product.name, product.description, product.category, price, formatMoney(product.price), stock) &&
         matchesSearch(nameFilter, product.name) &&
@@ -86,7 +86,7 @@ export function ProductsAdminPage() {
       price: product.price,
       imageUrl: product.imageUrl ?? '',
       category: product.category ?? '',
-      inStock: product.inStock,
+      stockQuantity: product.stockQuantity,
     })
     setPriceInput(String(product.price))
   }
@@ -112,7 +112,7 @@ export function ProductsAdminPage() {
       price,
       imageUrl: form.imageUrl?.trim() || undefined,
       category: form.category?.trim() || undefined,
-      inStock: form.inStock,
+      stockQuantity: Math.max(0, Math.floor(Number(form.stockQuantity) || 0)),
     }
     try {
       if (editingId != null) {
@@ -214,15 +214,20 @@ export function ProductsAdminPage() {
                 onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
               />
             </div>
-            <label className="checkbox-row" htmlFor="prod-stock">
+            <div>
+              <label htmlFor="prod-stock">Inventario (unidades)</label>
               <input
                 id="prod-stock"
-                type="checkbox"
-                checked={form.inStock}
-                onChange={(e) => setForm((f) => ({ ...f, inStock: e.target.checked }))}
+                type="number"
+                min="0"
+                step="1"
+                required
+                value={form.stockQuantity}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, stockQuantity: Number(e.target.value) }))
+                }
               />
-              En inventario
-            </label>
+            </div>
             <div className="hero-actions">
               <Button type="submit" disabled={saving}>
                 {saving ? 'Guardando…' : editingId != null ? 'Actualizar' : 'Crear'}
@@ -296,7 +301,7 @@ export function ProductsAdminPage() {
                             <td>{product.name}</td>
                             <td>{product.category ?? '—'}</td>
                             <td>{formatMoney(product.price)}</td>
-                            <td>{product.inStock ? 'Sí' : 'No'}</td>
+                            <td>{product.stockQuantity}</td>
                             <td className="table-actions">
                               <button type="button" className="link-btn" onClick={() => startEdit(product)}>
                                 Editar

@@ -158,7 +158,7 @@ export function CartPage() {
                       id={`qty-${product.id}`}
                       type="number"
                       min={1}
-                      max={99}
+                      max={Math.max(1, product.stockQuantity ?? 1)}
                       value={quantity}
                       onChange={(e) => updateQuantity(product.id, Number(e.target.value))}
                     />

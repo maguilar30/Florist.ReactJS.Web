@@ -547,6 +547,13 @@ textarea {
   gap: 0.75rem;
 }
 
+.product-card-body p.product-card-stock,
+.product-detail-stock {
+  margin: 0.65rem 0 0;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
 .price {
   font-weight: 600;
   color: var(--color-rose);

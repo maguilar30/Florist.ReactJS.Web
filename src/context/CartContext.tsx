@@ -49,17 +49,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback(
     (product: Product, quantity = 1) => {
+      const max = Math.max(0, product.stockQuantity ?? 0)
+      if (max <= 0) return
       setItems((prev) => {
         const existing = prev.find((i) => i.product.id === product.id)
         let next: CartItem[]
         if (existing) {
           next = prev.map((i) =>
             i.product.id === product.id
-              ? { ...i, quantity: i.quantity + quantity }
+              ? { ...i, product, quantity: Math.min(max, i.quantity + quantity) }
               : i,
           )
         } else {
-          next = [...prev, { product, quantity }]
+          next = [...prev, { product, quantity: Math.min(max, quantity) }]
         }
         saveCart(next)
         return next
@@ -70,10 +72,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const updateQuantity = useCallback((productId: number, quantity: number) => {
     setItems((prev) => {
+      const item = prev.find((i) => i.product.id === productId)
+      const max = Math.max(0, item?.product.stockQuantity ?? 0)
       const next =
         quantity <= 0
           ? prev.filter((i) => i.product.id !== productId)
-          : prev.map((i) => (i.product.id === productId ? { ...i, quantity } : i))
+          : prev.map((i) =>
+              i.product.id === productId ? { ...i, quantity: Math.min(max, quantity) } : i,
+            )
       saveCart(next)
       return next
     })

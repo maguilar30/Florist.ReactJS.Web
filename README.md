@@ -33,8 +33,8 @@ During development, requests to `/api/*` are proxied to `VITE_API_PROXY_TARGET` 
 
 ## What the SPA does
 
-- Public catalog and product detail (live data from `GET /api/products`)
-- Local cart (`localStorage`), delivery fees from `GET /api/delivery-fees`, and **Solicitar pedido** (`POST /api/orders`)
+- Public catalog and product detail (live data from `GET /api/products`, including `stockQuantity`)
+- Local cart (`localStorage`) capped to available stock, delivery fees from `GET /api/delivery-fees`, and **Solicitar pedido** (`POST /api/orders`; the API deducts inventory and restores it if the order is later cancelled)
 - Login, register, and profile (`/api/auth/*`)
 - Account page shows the signed-in profile and loyalty stars (one star per delivered order); **Mis pedidos** lists that user's orders (`GET /api/orders/mine`) and each order's history
 - Contact page and footer load shop address, phone, hours, email, and social links from `GET /api/contact-info`

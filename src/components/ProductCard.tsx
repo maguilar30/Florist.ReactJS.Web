@@ -41,6 +41,9 @@ export function ProductCard({ product }: ProductCardProps) {
             {product.inStock ? 'Agregar' : 'Agotado'}
           </Button>
         </div>
+        <p className="product-card-stock">
+          {product.inStock ? `${product.stockQuantity} en inventario` : 'Sin inventario'}
+        </p>
       </div>
     </article>
   )

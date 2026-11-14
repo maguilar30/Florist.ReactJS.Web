@@ -131,15 +131,25 @@ export function CreateOrderAdminPage() {
       setError('Selecciona un producto y una cantidad válida.')
       return
     }
+    const max = Math.max(0, product.stockQuantity ?? 0)
+    if (max <= 0) {
+      setError(`${product.name} no tiene inventario disponible.`)
+      return
+    }
     setError(null)
     setLines((current) => {
       const existing = current.find((line) => line.productId === product.id)
       if (existing) {
         return current.map((line) =>
-          line.productId === product.id ? { ...line, quantity: Math.min(99, line.quantity + qty) } : line,
+          line.productId === product.id
+            ? { ...line, quantity: Math.min(max, line.quantity + qty) }
+            : line,
         )
       }
-      return [...current, { productId: product.id, name: product.name, price: product.price, quantity: qty }]
+      return [
+        ...current,
+        { productId: product.id, name: product.name, price: product.price, quantity: Math.min(max, qty) },
+      ]
     })
   }
 
@@ -361,8 +371,8 @@ export function CreateOrderAdminPage() {
               <select id="order-product" value={productId} onChange={(e) => setProductId(e.target.value)}>
                 <option value="">Seleccionar…</option>
                 {products.map((product) => (
-                  <option key={product.id} value={product.id}>
-                    {product.name} — {formatMoney(product.price)}
+                  <option key={product.id} value={product.id} disabled={!product.inStock}>
+                    {product.name} — {formatMoney(product.price)} ({product.stockQuantity} und.)
                   </option>
                 ))}
               </select>
