@@ -1097,6 +1097,16 @@ textarea {
   margin: 0.75rem 0 1rem;
 }
 
+.account-password-form {
+  margin: 0 0 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(92, 107, 90, 0.12);
+}
+
+.account-password-form h3 {
+  margin: 0 0 0.75rem;
+}
+
 .loyalty-stars {
   display: flex;
   flex-wrap: wrap;

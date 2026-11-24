@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { changePassword } from '../api/auth'
 import { fetchMyLoyalty } from '../api/loyalty'
 import { ApiError } from '../api/client'
 import { useAuth } from '../context/AuthContext'
@@ -11,6 +12,12 @@ export function AccountPage() {
   const { user, logout, isAdmin } = useAuth()
   const [loyalty, setLoyalty] = useState<LoyaltyMe | null>(null)
   const [loyaltyError, setLoyaltyError] = useState<string | null>(null)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [passwordMessage, setPasswordMessage] = useState<string | null>(null)
+  const [savingPassword, setSavingPassword] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -27,6 +34,32 @@ export function AccountPage() {
       cancelled = true
     }
   }, [])
+
+  async function handleChangePassword(e: FormEvent) {
+    e.preventDefault()
+    setPasswordError(null)
+    setPasswordMessage(null)
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Las contraseñas no coinciden.')
+      return
+    }
+    if (currentPassword === newPassword) {
+      setPasswordError('La nueva contraseña debe ser distinta a la actual.')
+      return
+    }
+    setSavingPassword(true)
+    try {
+      const result = await changePassword(currentPassword, newPassword)
+      setPasswordMessage(result.message || 'Tu contraseña se actualizó.')
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+    } catch (err) {
+      setPasswordError(err instanceof ApiError ? err.message : 'No se pudo actualizar la contraseña')
+    } finally {
+      setSavingPassword(false)
+    }
+  }
 
   if (!user) return null
 
@@ -109,6 +142,58 @@ export function AccountPage() {
               </>
             )}
           </div>
+
+          <form className="auth-form account-password-form" onSubmit={handleChangePassword}>
+            <h3>Cambiar contraseña</h3>
+            {passwordError && (
+              <p className="form-error" role="alert">
+                {passwordError}
+              </p>
+            )}
+            {passwordMessage && (
+              <p className="banner banner-success" role="status">
+                {passwordMessage}
+              </p>
+            )}
+            <div>
+              <label htmlFor="account-current-password">Contraseña actual</label>
+              <input
+                id="account-current-password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="account-new-password">Nueva contraseña</label>
+              <input
+                id="account-new-password"
+                type="password"
+                autoComplete="new-password"
+                minLength={8}
+                required
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="account-confirm-password">Confirmar nueva contraseña</label>
+              <input
+                id="account-confirm-password"
+                type="password"
+                autoComplete="new-password"
+                minLength={8}
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+            <Button type="submit" disabled={savingPassword}>
+              {savingPassword ? 'Guardando…' : 'Actualizar contraseña'}
+            </Button>
+          </form>
 
           <div className="hero-actions">
             <Link to="/mis-pedidos" className="btn btn-outline">

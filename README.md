@@ -36,7 +36,7 @@ During development, requests to `/api/*` are proxied to `VITE_API_PROXY_TARGET` 
 - Public catalog and product detail (live data from `GET /api/products`, including `stockQuantity`)
 - Local cart (`localStorage`) capped to available stock, delivery fees from `GET /api/delivery-fees`, and **Solicitar pedido** (`POST /api/orders`; the API deducts inventory and restores it if the order is later cancelled)
 - Login, register, and profile (`/api/auth/*`)
-- Account page shows the signed-in profile and loyalty stars (one star per delivered order); **Mis pedidos** lists that user's orders (`GET /api/orders/mine`) and each order's history
+- Account page shows the signed-in profile and loyalty stars (one star per delivered order), and lets the user change their password (`POST /api/auth/change-password`); **Mis pedidos** lists that user's orders (`GET /api/orders/mine`) and each order's history
 - Contact page and footer load shop address, phone, hours, email, and social links from `GET /api/contact-info`
 - Admin: products, product categories, CRM customers + registered clients, orders (including creating an order for a customer), discount codes (with an overall redemption cap), loyalty rewards, customers with loyalty stars, contact messages, shop contact details, and delivery fees
 
@@ -60,6 +60,7 @@ JSON field names below are camelCase as the UI expects.
 | POST | `/api/auth/register` | No | `{ email, password, fullName, phone? }` |
 | POST | `/api/auth/forgot-password` | No | `{ email }` |
 | POST | `/api/auth/reset-password` | No | `{ token, password }` |
+| POST | `/api/auth/change-password` | Bearer JWT | `{ currentPassword, newPassword }` |
 | GET | `/api/auth/me` | Bearer JWT | — |
 
 Users with role `Admin` (case-insensitive) see **Pedidos**, **Productos**, and **Clientes**.
