@@ -31,7 +31,11 @@ VITE_COMPANY_ID=yada
 
 During development, requests to `/api/*` are proxied to `VITE_API_PROXY_TARGET` (see `vite.config.ts`). Leave `VITE_API_BASE_URL` as `/api` to use that proxy. If you set an absolute API URL instead, the FastAPI CORS list must include `http://localhost:5173`.
 
-On Azure, `npm start` serves `dist/` and `/config.js` (SPA fallback for React Router). Set **App Settings** `API_BASE_URL` (absolute API origin + `/api`) and `COMPANY_ID`. Those override the Vite build values without rebuilding. The API `CORS_ORIGINS` list must include the web app URL (for example `https://your-spa.azurewebsites.net`).
+On Azure Static Web Apps there is **no FastAPI**. A request to `/api/contact-info` on `*.azurestaticapps.net` is same-origin and returns **404 HTML**. Production builds must use an **absolute** API URL from `.env.production` (`VITE_API_BASE_URL=https://your-api.azurewebsites.net/api`). Rebuild and redeploy after changing it.
+
+On Azure App Service, `npm start` serves `dist/` and `/config.js`. Set **App Settings** `API_BASE_URL` and `COMPANY_ID` to override the Vite values without rebuilding.
+
+The API `CORS_ORIGINS` list must include the SPA origin, for example `https://wonderful-grass-036fba41e.6.azurestaticapps.net` (no trailing slash).
 
 ## Deploy to Azure App Service
 
