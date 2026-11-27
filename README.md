@@ -31,6 +31,41 @@ VITE_COMPANY_ID=yada
 
 During development, requests to `/api/*` are proxied to `VITE_API_PROXY_TARGET` (see `vite.config.ts`). Leave `VITE_API_BASE_URL` as `/api` to use that proxy. If you set an absolute API URL instead, the FastAPI CORS list must include `http://localhost:5173`.
 
+On Azure, `npm start` serves `dist/` and `/config.js` (SPA fallback for React Router). Set **App Settings** `API_BASE_URL` (absolute API origin + `/api`) and `COMPANY_ID`. Those override the Vite build values without rebuilding. The API `CORS_ORIGINS` list must include the web app URL (for example `https://your-spa.azurewebsites.net`).
+
+## Deploy to Azure App Service
+
+Linux Node 20 (or later). From `client/`:
+
+```powershell
+cd "D:\GitHub Projects\Shopping Cart\client"
+npm ci
+npm run build
+```
+
+Zip the app **without** `node_modules` and **without** `.env` (Oryx will install and build, or include `dist/` if you already built):
+
+```powershell
+zip -r ../web.zip . -x "node_modules/*" ".git/*" ".env" "dist-ssr/*"
+```
+
+```powershell
+az webapp up --name shopping-web-shopping-cart --resource-group rg-shopping-prod --runtime "NODE:20-lts" --sku B1
+```
+
+Or zip-deploy onto an existing site, then:
+
+```powershell
+az webapp config appsettings set --name shopping-web-shopping-cart --resource-group rg-shopping-prod --settings `
+  SCM_DO_BUILD_DURING_DEPLOYMENT=true `
+  API_BASE_URL="https://shopping-api-shopping-cart.azurewebsites.net/api" `
+  COMPANY_ID=yada
+
+az webapp config set --name shopping-web-shopping-cart --resource-group rg-shopping-prod --startup-file "npm start"
+```
+
+Azure sets `PORT`. `npm start` runs `node server.mjs`, which listens on `0.0.0.0:$PORT`.
+
 ## What the SPA does
 
 - Public catalog and product detail (live data from `GET /api/products`, including `stockQuantity`)
@@ -113,7 +148,8 @@ Admin order statuses: pago pendiente, pagado, en preparación, listo para recoge
 
 - `npm run dev` — development server
 - `npm run build` — production build to `dist/`
-- `npm run preview` — preview production build
+- `npm start` — serve `dist/` (Azure App Service)
+- `npm run preview` — preview production build with Vite
 - `npm run lint` — oxlint
 
 ## Routes

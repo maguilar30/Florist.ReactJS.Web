@@ -1,7 +1,11 @@
 import type { ApiProblem } from '../types'
 
+function runtimeConfig(): AppRuntimeConfig {
+  return typeof window !== 'undefined' ? window.__APP_CONFIG__ ?? {} : {}
+}
+
 export function getCompanyId(): string {
-  const configured = import.meta.env.VITE_COMPANY_ID as string | undefined
+  const configured = runtimeConfig().companyId || import.meta.env.VITE_COMPANY_ID
   return (configured?.trim() || 'yada').toLowerCase()
 }
 
@@ -10,7 +14,7 @@ function tokenStorageKey(): string {
 }
 
 export function getApiBaseUrl(): string {
-  const configured = import.meta.env.VITE_API_BASE_URL as string | undefined
+  const configured = runtimeConfig().apiBaseUrl || import.meta.env.VITE_API_BASE_URL
   if (configured?.trim()) {
     return configured.replace(/\/$/, '')
   }
